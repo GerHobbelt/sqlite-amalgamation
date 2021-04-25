@@ -492,6 +492,12 @@ static void shell_out_of_memory(void){
   exit(1);
 }
 
+//#ifdef SQLITE_ENABLE_SQLLOG
+void sqlite3_init_sqllog(void) {
+	/**/
+}
+//#endif
+
 #ifdef SQLITE_DEBUG
 /* This routine is called when a simulated OOM occurs.  It is broken
 ** out as a separate routine to make it easy to set a breakpoint on

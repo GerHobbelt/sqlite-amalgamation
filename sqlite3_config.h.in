@@ -71,5 +71,12 @@
 #   define SQLITE_USE_ALLOCA
 #endif /* SQLITE_RECOMMENDED_OPTIONS */
 
+#if defined(SQLITE_OMIT_DECLTYPE) && defined(SQLITE_ENABLE_COLUMN_METADATA)
+#  undef SQLITE_OMIT_DECLTYPE
+#endif
+
+#ifdef SQLITE_ENABLE_SQLLOG
+void sqlite3_init_sqllog(void);
+#endif
 
 #endif /* SQLITE3_CONFIG_H */
