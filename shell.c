@@ -90,7 +90,7 @@
 typedef sqlite3_int64 i64;
 typedef sqlite3_uint64 u64;
 typedef unsigned char u8;
-#if SQLITE_USER_AUTHENTICATION
+#ifdef SQLITE_USER_AUTHENTICATION
 # include "sqlite3userauth.h"
 #endif
 #include <ctype.h>
@@ -20369,7 +20369,7 @@ static int do_meta_command(char *zLine, ShellState *p){
   }else
 #endif
 
-#if SQLITE_USER_AUTHENTICATION
+#ifdef SQLITE_USER_AUTHENTICATION
   if( c=='u' && strncmp(azArg[0], "user", n)==0 ){
     if( nArg<2 ){
       raw_printf(stderr, "Usage: .user SUBCOMMAND ...\n");
