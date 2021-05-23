@@ -55,7 +55,7 @@ option(SQLITE_ENABLE_EXPLAIN_COMMENTS        "enables EXPLAIN comments for enhan
 option(SQLITE_EXPLAIN_ESTIMATED_ROWS         "enables the inclusion of row estimates in the EXPLAIN and EXPLAIN QUERY PLAN queries"     ON)
 option(SQLITE_ENABLE_UNKNOWN_SQL_FUNCTION    "enables the automatic substituted of 'unknown' in place of any unrecognized function name when doing an EXPLAIN or EXPLAIN QUERY PLAN"     ON)
 option(SQLITE_ENABLE_QPSG                    "enables the Query Planner Stability Guarantee"     OFF)
-option(SQLITE_ENABLE_SESSION                 "enables the sqlite3session extension"     OFF)
+option(SQLITE_ENABLE_SESSION                 "enables the sqlite3session extension"     ON)
 option(SQLITE_ENABLE_SNAPSHOT                "enables database snapshot support"     ON)
 option(SQLITE_ENABLE_SORTER_REFERENCES       "enables the external sort optimization for large table column values"     ON)
 option(SQLITE_DEFAULT_AUTOMATIC_INDEX        "enables automatic indexes"     OFF)
