@@ -6835,7 +6835,7 @@ static void zipfileInflate(
     sqlite3_result_error_nomem(pCtx);
   }else{
     int err;
-    z_stream str;
+	zng_stream str;
     memset(&str, 0, sizeof(str));
 
     str.next_in = (Byte*)aIn;
@@ -6843,11 +6843,11 @@ static void zipfileInflate(
     str.next_out = (Byte*)aRes;
     str.avail_out = nOut;
 
-    err = inflateInit2(&str, -15);
+    err = zng_inflateInit2(&str, -15);
     if( err!=Z_OK ){
       zipfileCtxErrorMsg(pCtx, "inflateInit2() failed (%d)", err);
     }else{
-      err = inflate(&str, Z_NO_FLUSH);
+      err = zng_inflate(&str, Z_NO_FLUSH);
       if( err!=Z_STREAM_END ){
         zipfileCtxErrorMsg(pCtx, "inflate() failed (%d)", err);
       }else{
@@ -6856,7 +6856,7 @@ static void zipfileInflate(
       }
     }
     sqlite3_free(aRes);
-    inflateEnd(&str);
+	zng_inflateEnd(&str);
   }
 }
 
@@ -6879,15 +6879,15 @@ static int zipfileDeflate(
 ){
   int rc = SQLITE_OK;
   sqlite3_int64 nAlloc;
-  z_stream str;
+  zng_stream str;
   u8 *aOut;
 
   memset(&str, 0, sizeof(str));
   str.next_in = (Bytef*)aIn;
   str.avail_in = nIn;
-  deflateInit2(&str, 9, Z_DEFLATED, -15, 8, Z_DEFAULT_STRATEGY);
+  zng_deflateInit2(&str, 9, Z_DEFLATED, -15, 8, Z_DEFAULT_STRATEGY);
 
-  nAlloc = deflateBound(&str, nIn);
+  nAlloc = zng_deflateBound(&str, nIn);
   aOut = (u8*)sqlite3_malloc64(nAlloc);
   if( aOut==0 ){
     rc = SQLITE_NOMEM;
@@ -6895,7 +6895,7 @@ static int zipfileDeflate(
     int res;
     str.next_out = aOut;
     str.avail_out = nAlloc;
-    res = deflate(&str, Z_FINISH);
+    res = zng_deflate(&str, Z_FINISH);
     if( res==Z_STREAM_END ){
       *ppOut = aOut;
       *pnOut = (int)str.total_out;
@@ -6904,7 +6904,7 @@ static int zipfileDeflate(
       *pzErr = sqlite3_mprintf("zipfile: deflate() error");
       rc = SQLITE_ERROR;
     }
-    deflateEnd(&str);
+	zng_deflateEnd(&str);
   }
 
   return rc;
@@ -8129,7 +8129,7 @@ static void sqlarCompressFunc(
   if( sqlite3_value_type(argv[0])==SQLITE_BLOB ){
     const Bytef *pData = sqlite3_value_blob(argv[0]);
     uLong nData = sqlite3_value_bytes(argv[0]);
-    uLongf nOut = compressBound(nData);
+    uLongf nOut = zng_compressBound(nData);
     Bytef *pOut;
 
     pOut = (Bytef*)sqlite3_malloc(nOut);
