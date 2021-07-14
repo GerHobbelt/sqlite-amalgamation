@@ -1,6 +1,3 @@
-# ignore all subdirectories
-**/
-
 # YouCompleteMe
 .ycm_extra_conf.*
 
@@ -40,22 +37,11 @@
 *.x86_64
 *.hex
 
-# build systems
-Makefile
-*.make
 # Visual studio
-*.htm
-*.html
 *.ncb
 *.idb
 *.suo
 *.pdb
-*.vcxproj.filters
-*.vcproj
-*.vcxproj
-*.sln
-*.rc
-
 
 # Debug files
 *.dSYM/
