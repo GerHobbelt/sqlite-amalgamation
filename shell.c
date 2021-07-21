@@ -64,6 +64,11 @@
 #pragma warning(disable : 4706)
 #endif /* defined(_MSC_VER) */
 
+#if defined(MONOLITHIC_TOOLSET)
+#define SQLITE_SHELL_IS_UTF8 1
+#include "mupdf/mutool.h"
+#endif
+
 /*
 ** No support for loadable extensions in VxWorks.
 */
@@ -446,7 +451,7 @@ static void*(*defaultMalloc)(int) = 0; /* The low-level malloc routine */
 ** This is the name of our program. It is set in main(), used
 ** in a number of other places, mostly for error messages.
 */
-static char *Argv0;
+static const char *Argv0;
 
 /*
 ** Prompt strings. Initialized in main. Settable with
@@ -492,6 +497,12 @@ static void shell_out_of_memory(void){
   raw_printf(stderr,"Error: out of memory\n");
   exit(1);
 }
+
+//#ifdef SQLITE_ENABLE_SQLLOG
+void sqlite3_init_sqllog(void) {
+	/**/
+}
+//#endif
 
 #ifdef SQLITE_DEBUG
 /* This routine is called when a simulated OOM occurs.  It is broken
@@ -21829,10 +21840,13 @@ static char *cmdline_option_value(int argc, char **argv, int i){
 #  endif
 #endif
 
-#if SQLITE_SHELL_IS_UTF8
-int SQLITE_CDECL main(int argc, char **argv){
+#if defined(MONOLITHIC_TOOLSET)
+int sqlite_main(int argc, const char** argv_) {
+  char **argv;
+#elif SQLITE_SHELL_IS_UTF8
+int SQLITE_CDECL main(int argc, const char **argv){
 #else
-int SQLITE_CDECL wmain(int argc, wchar_t **wargv){
+int SQLITE_CDECL sqlite_wmain(int argc, const wchar_t **wargv){
   char **argv;
 #endif
   char *zErrMsg = 0;
