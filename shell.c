@@ -82,6 +82,7 @@
 #if defined(_HAVE_SQLITE_CONFIG_H) && !defined(SQLITECONFIG_H)
 #include "sqlite3_config.h"
 #define SQLITECONFIG_H 1
+#endif
 
 #include "mupdf/mutool.h"
 
@@ -6729,7 +6730,7 @@ SQLITE_EXTENSION_INIT1
 #include <string.h>
 #include <assert.h>
 
-#include <zlib.h>
+#include <zlib-ng.h>
 
 #ifndef SQLITE_OMIT_VIRTUALTABLE
 
@@ -7645,7 +7646,7 @@ static void zipfileInflate(
     sqlite3_result_error_nomem(pCtx);
   }else{
     int err;
-    z_stream str;
+    zng_stream str;
     memset(&str, 0, sizeof(str));
 
     str.next_in = (Byte*)aIn;
@@ -7653,11 +7654,11 @@ static void zipfileInflate(
     str.next_out = (Byte*)aRes;
     str.avail_out = nOut;
 
-    err = inflateInit2(&str, -15);
+    err = zng_inflateInit2(&str, -15);
     if( err!=Z_OK ){
       zipfileCtxErrorMsg(pCtx, "inflateInit2() failed (%d)", err);
     }else{
-      err = inflate(&str, Z_NO_FLUSH);
+      err = zng_inflate(&str, Z_NO_FLUSH);
       if( err!=Z_STREAM_END ){
         zipfileCtxErrorMsg(pCtx, "inflate() failed (%d)", err);
       }else{
@@ -7666,7 +7667,7 @@ static void zipfileInflate(
       }
     }
     sqlite3_free(aRes);
-    inflateEnd(&str);
+    zng_inflateEnd(&str);
   }
 }
 
@@ -7689,15 +7690,15 @@ static int zipfileDeflate(
 ){
   int rc = SQLITE_OK;
   sqlite3_int64 nAlloc;
-  z_stream str;
+  zng_stream str;
   u8 *aOut;
 
   memset(&str, 0, sizeof(str));
   str.next_in = (Bytef*)aIn;
   str.avail_in = nIn;
-  deflateInit2(&str, 9, Z_DEFLATED, -15, 8, Z_DEFAULT_STRATEGY);
+  zng_deflateInit2(&str, 9, Z_DEFLATED, -15, 8, Z_DEFAULT_STRATEGY);
 
-  nAlloc = deflateBound(&str, nIn);
+  nAlloc = zng_deflateBound(&str, nIn);
   aOut = (u8*)sqlite3_malloc64(nAlloc);
   if( aOut==0 ){
     rc = SQLITE_NOMEM;
@@ -7705,7 +7706,7 @@ static int zipfileDeflate(
     int res;
     str.next_out = aOut;
     str.avail_out = nAlloc;
-    res = deflate(&str, Z_FINISH);
+    res = zng_deflate(&str, Z_FINISH);
     if( res==Z_STREAM_END ){
       *ppOut = aOut;
       *pnOut = (int)str.total_out;
@@ -7714,7 +7715,7 @@ static int zipfileDeflate(
       *pzErr = sqlite3_mprintf("zipfile: deflate() error");
       rc = SQLITE_ERROR;
     }
-    deflateEnd(&str);
+    zng_deflateEnd(&str);
   }
 
   return rc;
@@ -8318,7 +8319,7 @@ static int zipfileUpdate(
               }
             }
           }
-          iCrc32 = crc32(0, aIn, nIn);
+          iCrc32 = zng_crc32(0, aIn, nIn);
         }
       }
     }
@@ -8712,7 +8713,7 @@ void zipfileStep(sqlite3_context *pCtx, int nVal, sqlite3_value **apVal){
   }else{
     aData = sqlite3_value_blob(pData);
     szUncompressed = nData = sqlite3_value_bytes(pData);
-    iCrc32 = crc32(0, aData, nData);
+    iCrc32 = zng_crc32(0, aData, nData);
     if( iMethod<0 || iMethod==8 ){
       int nOut = 0;
       rc = zipfileDeflate(aData, nData, &aFree, &nOut, &zErr);
@@ -8917,7 +8918,7 @@ int sqlite3_zipfile_init(
 */
 /* #include "sqlite3ext.h" */
 SQLITE_EXTENSION_INIT1
-#include <zlib.h>
+#include <zlib-ng.h>
 #include <assert.h>
 
 /*
@@ -8944,7 +8945,7 @@ static void sqlarCompressFunc(
   if( sqlite3_value_type(argv[0])==SQLITE_BLOB ){
     const Bytef *pData = sqlite3_value_blob(argv[0]);
     uLong nData = sqlite3_value_bytes(argv[0]);
-    uLongf nOut = compressBound(nData);
+	size_t nOut = zng_compressBound(nData);
     Bytef *pOut;
 
     pOut = (Bytef*)sqlite3_malloc(nOut);
@@ -8952,7 +8953,7 @@ static void sqlarCompressFunc(
       sqlite3_result_error_nomem(context);
       return;
     }else{
-      if( Z_OK!=compress(pOut, &nOut, pData, nData) ){
+      if( Z_OK!=zng_compress(pOut, &nOut, pData, nData) ){
         sqlite3_result_error(context, "error in compress()", -1);
       }else if( nOut<nData ){
         sqlite3_result_blob(context, pOut, nOut, SQLITE_TRANSIENT);
@@ -8982,7 +8983,7 @@ static void sqlarUncompressFunc(
   sqlite3_value **argv
 ){
   uLong nData;
-  uLongf sz;
+  size_t sz;
 
   assert( argc==2 );
   sz = sqlite3_value_int(argv[1]);
@@ -8992,7 +8993,7 @@ static void sqlarUncompressFunc(
   }else{
     const Bytef *pData= sqlite3_value_blob(argv[0]);
     Bytef *pOut = sqlite3_malloc(sz);
-    if( Z_OK!=uncompress(pOut, &sz, pData, nData) ){
+    if( Z_OK!=zng_uncompress(pOut, &sz, pData, nData) ){
       sqlite3_result_error(context, "error in uncompress()", -1);
     }else{
       sqlite3_result_blob(context, pOut, sz, SQLITE_TRANSIENT);
@@ -17020,7 +17021,7 @@ struct ArCommand {
   char *zSrcTable;                /* "sqlar", "zipfile($file)" or "zip" */
   const char *zFile;              /* --file argument, or NULL */
   const char *zDir;               /* --directory argument, or NULL */
-  char **azArg;                   /* Array of command arguments */
+  const char **azArg;             /* Array of command arguments */
   ShellState *p;                  /* Shell state */
   sqlite3 *db;                    /* Database containing the archive */
 };
@@ -17113,7 +17114,7 @@ static int arProcessSwitch(ArCommand *pAr, int eSwitch, const char *zArg){
 ** SQLITE_ERROR returned.
 */
 static int arParseCommand(
-  char **azArg,                   /* Array of arguments passed to dot command */
+  const char **azArg,             /* Array of arguments passed to dot command */
   int nArg,                       /* Number of entries in azArg[] */
   ArCommand *pAr                  /* Populate this object */
 ){
@@ -17142,7 +17143,7 @@ static int arParseCommand(
     utf8_printf(stderr, "Wrong number of arguments.  Usage:\n");
     return arUsage(stderr);
   }else{
-    char *z = azArg[1];
+    const char *z = azArg[1];
     if( z[0]!='-' ){
       /* Traditional style [tar] invocation */
       int i;
@@ -17272,7 +17273,7 @@ static int arCheckEntries(ArCommand *pAr){
     );
     j = sqlite3_bind_parameter_index(pTest, "$name");
     for(i=0; i<pAr->nArg && rc==SQLITE_OK; i++){
-      char *z = pAr->azArg[i];
+      char *z = strdup(pAr->azArg[i]);
       int n = strlen30(z);
       int bOk = 0;
       while( n>0 && z[n-1]=='/' ) n--;
@@ -17286,6 +17287,7 @@ static int arCheckEntries(ArCommand *pAr){
         utf8_printf(stderr, "not found in archive: %s\n", z);
         rc = SQLITE_ERROR;
       }
+	  free(z);
     }
     shellFinalize(&rc, pTest);
   }
@@ -17591,7 +17593,7 @@ end_ar_transaction:
 static int arDotCommand(
   ShellState *pState,          /* Current shell tool state */
   int fromCmdLine,             /* True if -A command-line option, not .ar cmd */
-  char **azArg,                /* Array of arguments passed to dot command */
+  const char **azArg,          /* Array of arguments passed to dot command */
   int nArg                     /* Number of entries in azArg[] */
 ){
   ArCommand cmd;
@@ -20492,7 +20494,7 @@ static int do_meta_command(char *zLine, ShellState *p){
     ** DB is normally "main".
     */
     if( strcmp(azCmd[0],"open")==0 ){
-      char *zName;
+      const char *zName;
       if( nCmd!=3 ) goto session_syntax_error;
       zName = azCmd[2];
       if( zName[0]==0 ) goto session_syntax_error;
@@ -21363,8 +21365,8 @@ static int do_meta_command(char *zLine, ShellState *p){
   if( c=='v' && strncmp(azArg[0], "version", n)==0 ){
     utf8_printf(p->out, "SQLite %s %s\n" /*extra-version-info*/,
         sqlite3_libversion(), sqlite3_sourceid());
-#if SQLITE_HAVE_ZLIB
-    utf8_printf(p->out, "zlib version %s\n", zlibVersion());
+#ifdef SQLITE_HAVE_ZLIB
+    utf8_printf(p->out, "zlib-ng version %s\n", zlibng_version());
 #endif
 #define CTIMEOPT_VAL_(opt) #opt
 #define CTIMEOPT_VAL(opt) CTIMEOPT_VAL_(opt)
