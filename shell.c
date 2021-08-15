@@ -21013,6 +21013,7 @@ static int do_meta_command(char *zLine, ShellState *p){
       { "prng_save",          SQLITE_TESTCTRL_PRNG_SAVE,     ""               },
       { "prng_seed",          SQLITE_TESTCTRL_PRNG_SEED,     "SEED ?db?"      },
       { "seek_count",         SQLITE_TESTCTRL_SEEK_COUNT,    ""               },
+      { "sorter_mmap",        SQLITE_TESTCTRL_SORTER_MMAP,   "NMAX"           },
       { "tune",               SQLITE_TESTCTRL_TUNE,          "ID VALUE"       },
     };
     int testctrl = -1;
@@ -21193,6 +21194,13 @@ static int do_meta_command(char *zLine, ShellState *p){
           break;
         }
 #endif
+        case SQLITE_TESTCTRL_SORTER_MMAP:
+          if( nArg==3 ){
+            int opt = (unsigned int)integerValue(azArg[2]);
+            rc2 = sqlite3_test_control(testctrl, p->db, opt);
+            isOk = 3;
+          }
+          break;
       }
     }
     if( isOk==0 && iCtrl>=0 ){
@@ -22115,6 +22123,14 @@ int SQLITE_CDECL wmain(int argc, const wchar_t **wargv){
       if( n<0 ) n = 0;
       sqlite3_config(SQLITE_CONFIG_LOOKASIDE, sz, n);
       if( sz*n==0 ) data.shellFlgs &= ~SHFLG_Lookaside;
+    }else if( strcmp(z,"-threadsafe")==0 ){
+      int n;
+      n = (int)integerValue(cmdline_option_value(argc,argv,++i));
+      switch( n ){
+         case 0:  sqlite3_config(SQLITE_CONFIG_SINGLETHREAD);  break;
+         case 2:  sqlite3_config(SQLITE_CONFIG_MULTITHREAD);   break;
+         default: sqlite3_config(SQLITE_CONFIG_SERIALIZED);    break;
+      }
 #ifdef SQLITE_ENABLE_VFSTRACE
     }else if( strcmp(z,"-vfstrace")==0 ){
       extern int vfstrace_register(
@@ -22326,6 +22342,8 @@ int SQLITE_CDECL wmain(int argc, const wchar_t **wargv){
     }else if( strcmp(z,"-pagecache")==0 ){
       i+=2;
     }else if( strcmp(z,"-lookaside")==0 ){
+      i+=2;
+    }else if( strcmp(z,"-threadsafe")==0 ){
       i+=2;
     }else if( strcmp(z,"-mmap")==0 ){
       i++;

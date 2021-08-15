@@ -4,7 +4,7 @@
 [attr]makefile		whitespace=trailing-space,space-before-tab,indent-with-non-tab,tabwidth=8
 
 # Source files:
-*			text=auto
+*			text=auto  eol=lf
 Make*			makefile
 *.mk			makefile
 *.make			makefile
