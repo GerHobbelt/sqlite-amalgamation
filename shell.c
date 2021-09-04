@@ -6754,7 +6754,9 @@ SQLITE_EXTENSION_INIT1
 /* typedef unsigned char u8; */
 typedef UINT32_TYPE u32;           /* 4-byte unsigned integer */
 typedef UINT16_TYPE u16;           /* 2-byte unsigned integer */
+#ifndef MIN     // may have already been defined in <zbuild.h>, which is included when we have ZLIB(NG) support enabled.
 #define MIN(a,b) ((a)<(b) ? (a) : (b))
+#endif
 
 #if defined(SQLITE_COVERAGE_TEST) || defined(SQLITE_MUTATION_TEST)
 # define ALWAYS(X)      (1)
