@@ -17,7 +17,6 @@
 ** edit file src/shell.c.in and/or some of the other files included by it,
 ** then rerun the tool/mkshellc.tcl script.
 */
-#line 1 "Z:/lib/tooling/qiqqa/MuPDF/thirdparty/owemdjee/sqlite/src/shell.c.in"
 /*
 ** 2001 September 15
 **
@@ -243,7 +242,6 @@ extern LPWSTR sqlite3_win32_utf8_to_unicode(const char *zText);
 #endif
 
 /* Get the shell extension interfaces and structs. */
-#line 1 "Z:/lib/tooling/qiqqa/MuPDF/thirdparty/owemdjee/sqlite/src/shext_linkage.h"
 /****************** Begin <projectDir>/src/shext_linkage.h ******************/
 #ifndef SQLITE3SHX_H
 #define SQLITE3SHX_H
@@ -470,7 +468,6 @@ typedef struct ShellExtensionLink {
 
 #endif /* !defined(SQLITE3SHX_H) */
 /******************* End <projectDir>/src/shext_linkage.h *******************/
-#line 227 "Z:/lib/tooling/qiqqa/MuPDF/thirdparty/owemdjee/sqlite/src/shell.c.in"
 
 /* For an embedded shell, allow the 3 standard streams to be specified. 
 ** If used, these names will have to refer to something globally reachable.
@@ -505,7 +502,7 @@ static void setTextMode(FILE *file, int isOutput){
 # define setTextMode(X,Y)
 #endif
 
-static const char *(azHelp[]);
+static const char **azHelp;
 static unsigned numCommands;
 
 /* True if the timer is enabled */
@@ -771,7 +768,7 @@ static void shell_out_of_memory(void){
 /* Check a pointer to see if it is NULL.  If it is NULL, exit with an
 ** out-of-memory error.
 */
-static void shell_check_oom(void *p){
+static void shell_check_oom(const void *p){
   if( p==0 ) shell_out_of_memory();
 }
 /* This pattern is ubiquitous and subject to change, so encapsulate it. */
@@ -1317,7 +1314,6 @@ static void shellAddSchemaName(
 #define SQLITE_EXTENSION_INIT2(X) (void)(X)
 
 #if defined(_WIN32) && defined(_MSC_VER)
-#line 1 "Z:/lib/tooling/qiqqa/MuPDF/thirdparty/owemdjee/sqlite/src/test_windirent.h"
 /****************** Begin <projectDir>/src/test_windirent.h ******************/
 /*
 ** 2015 November 30
@@ -1479,8 +1475,6 @@ extern INT closedir(LPDIR dirp);
 
 #endif /* defined(WIN32) && defined(_MSC_VER) */
 /******************* End <projectDir>/src/test_windirent.h *******************/
-#line 1074 "Z:/lib/tooling/qiqqa/MuPDF/thirdparty/owemdjee/sqlite/src/shell.c.in"
-#line 1 "Z:/lib/tooling/qiqqa/MuPDF/thirdparty/owemdjee/sqlite/src/test_windirent.c"
 /****************** Begin <projectDir>/src/test_windirent.c ******************/
 /*
 ** 2015 November 30
@@ -1674,10 +1668,8 @@ INT closedir(
 
 #endif /* defined(WIN32) && defined(_MSC_VER) */
 /******************* End <projectDir>/src/test_windirent.c *******************/
-#line 1075 "Z:/lib/tooling/qiqqa/MuPDF/thirdparty/owemdjee/sqlite/src/shell.c.in"
 #define dirent DIRENT
 #endif
-#line 1 "Z:/lib/tooling/qiqqa/MuPDF/thirdparty/owemdjee/sqlite/src/../ext/misc/shathree.c"
 /****************** Begin <projectDir>/ext/misc/shathree.c ******************/
 /*
 ** 2017-03-08
@@ -2404,8 +2396,6 @@ int sqlite3_shathree_init(
   return rc;
 }
 /******************* End <projectDir>/ext/misc/shathree.c *******************/
-#line 1078 "Z:/lib/tooling/qiqqa/MuPDF/thirdparty/owemdjee/sqlite/src/shell.c.in"
-#line 1 "Z:/lib/tooling/qiqqa/MuPDF/thirdparty/owemdjee/sqlite/src/../ext/misc/fileio.c"
 /******************* Begin <projectDir>/ext/misc/fileio.c *******************/
 /*
 ** 2014-06-13
@@ -3438,8 +3428,6 @@ int sqlite3_fileio_init(
 #  include "test_windirent.c"
 #endif
 /******************** End <projectDir>/ext/misc/fileio.c ********************/
-#line 1079 "Z:/lib/tooling/qiqqa/MuPDF/thirdparty/owemdjee/sqlite/src/shell.c.in"
-#line 1 "Z:/lib/tooling/qiqqa/MuPDF/thirdparty/owemdjee/sqlite/src/../ext/misc/completion.c"
 /***************** Begin <projectDir>/ext/misc/completion.c *****************/
 /*
 ** 2017-07-10
@@ -3943,8 +3931,6 @@ int sqlite3_completion_init(
   return rc;
 }
 /****************** End <projectDir>/ext/misc/completion.c ******************/
-#line 1080 "Z:/lib/tooling/qiqqa/MuPDF/thirdparty/owemdjee/sqlite/src/shell.c.in"
-#line 1 "Z:/lib/tooling/qiqqa/MuPDF/thirdparty/owemdjee/sqlite/src/../ext/misc/appendvfs.c"
 /****************** Begin <projectDir>/ext/misc/appendvfs.c ******************/
 /*
 ** 2017-10-20
@@ -4619,8 +4605,6 @@ int sqlite3_appendvfs_init(
   return rc;
 }
 /******************* End <projectDir>/ext/misc/appendvfs.c *******************/
-#line 1081 "Z:/lib/tooling/qiqqa/MuPDF/thirdparty/owemdjee/sqlite/src/shell.c.in"
-#line 1 "Z:/lib/tooling/qiqqa/MuPDF/thirdparty/owemdjee/sqlite/src/../ext/misc/memtrace.c"
 /****************** Begin <projectDir>/ext/misc/memtrace.c ******************/
 /*
 ** 2019-01-21
@@ -4731,8 +4715,6 @@ int sqlite3MemTraceDeactivate(void){
   return rc;
 }
 /******************* End <projectDir>/ext/misc/memtrace.c *******************/
-#line 1082 "Z:/lib/tooling/qiqqa/MuPDF/thirdparty/owemdjee/sqlite/src/shell.c.in"
-#line 1 "Z:/lib/tooling/qiqqa/MuPDF/thirdparty/owemdjee/sqlite/src/../ext/misc/uint.c"
 /******************** Begin <projectDir>/ext/misc/uint.c ********************/
 /*
 ** 2020-04-14
@@ -4827,8 +4809,6 @@ int sqlite3_uint_init(
   return sqlite3_create_collation(db, "uint", SQLITE_UTF8, 0, uintCollFunc);
 }
 /********************* End <projectDir>/ext/misc/uint.c *********************/
-#line 1083 "Z:/lib/tooling/qiqqa/MuPDF/thirdparty/owemdjee/sqlite/src/shell.c.in"
-#line 1 "Z:/lib/tooling/qiqqa/MuPDF/thirdparty/owemdjee/sqlite/src/../ext/misc/decimal.c"
 /******************* Begin <projectDir>/ext/misc/decimal.c *******************/
 /*
 ** 2020-06-22
@@ -5466,8 +5446,6 @@ int sqlite3_decimal_init(
   return rc;
 }
 /******************** End <projectDir>/ext/misc/decimal.c ********************/
-#line 1084 "Z:/lib/tooling/qiqqa/MuPDF/thirdparty/owemdjee/sqlite/src/shell.c.in"
-#line 1 "Z:/lib/tooling/qiqqa/MuPDF/thirdparty/owemdjee/sqlite/src/../ext/misc/ieee754.c"
 /******************* Begin <projectDir>/ext/misc/ieee754.c *******************/
 /*
 ** 2013-04-17
@@ -5763,8 +5741,6 @@ int sqlite3_ieee_init(
   return rc;
 }
 /******************** End <projectDir>/ext/misc/ieee754.c ********************/
-#line 1085 "Z:/lib/tooling/qiqqa/MuPDF/thirdparty/owemdjee/sqlite/src/shell.c.in"
-#line 1 "Z:/lib/tooling/qiqqa/MuPDF/thirdparty/owemdjee/sqlite/src/../ext/misc/series.c"
 /******************* Begin <projectDir>/ext/misc/series.c *******************/
 /*
 ** 2015-08-18
@@ -6226,8 +6202,6 @@ int sqlite3_series_init(
   return rc;
 }
 /******************** End <projectDir>/ext/misc/series.c ********************/
-#line 1086 "Z:/lib/tooling/qiqqa/MuPDF/thirdparty/owemdjee/sqlite/src/shell.c.in"
-#line 1 "Z:/lib/tooling/qiqqa/MuPDF/thirdparty/owemdjee/sqlite/src/../ext/misc/regexp.c"
 /******************* Begin <projectDir>/ext/misc/regexp.c *******************/
 /*
 ** 2012-11-13
@@ -7003,9 +6977,7 @@ int sqlite3_regexp_init(
   return rc;
 }
 /******************** End <projectDir>/ext/misc/regexp.c ********************/
-#line 1087 "Z:/lib/tooling/qiqqa/MuPDF/thirdparty/owemdjee/sqlite/src/shell.c.in"
 #ifdef SQLITE_HAVE_ZLIB
-#line 1 "Z:/lib/tooling/qiqqa/MuPDF/thirdparty/owemdjee/sqlite/src/../ext/misc/zipfile.c"
 /******************* Begin <projectDir>/ext/misc/zipfile.c *******************/
 /*
 ** 2017-12-26
@@ -9212,8 +9184,6 @@ int sqlite3_zipfile_init(
   return zipfileRegister(db);
 }
 /******************** End <projectDir>/ext/misc/zipfile.c ********************/
-#line 1089 "Z:/lib/tooling/qiqqa/MuPDF/thirdparty/owemdjee/sqlite/src/shell.c.in"
-#line 1 "Z:/lib/tooling/qiqqa/MuPDF/thirdparty/owemdjee/sqlite/src/../ext/misc/sqlar.c"
 /******************** Begin <projectDir>/ext/misc/sqlar.c ********************/
 /*
 ** 2017-12-17
@@ -9340,9 +9310,7 @@ int sqlite3_sqlar_init(
   return rc;
 }
 /********************* End <projectDir>/ext/misc/sqlar.c *********************/
-#line 1090 "Z:/lib/tooling/qiqqa/MuPDF/thirdparty/owemdjee/sqlite/src/shell.c.in"
 #endif
-#line 1 "Z:/lib/tooling/qiqqa/MuPDF/thirdparty/owemdjee/sqlite/src/../ext/expert/sqlite3expert.h"
 /*************** Begin <projectDir>/ext/expert/sqlite3expert.h ***************/
 /*
 ** 2017 April 07
@@ -9513,8 +9481,6 @@ void sqlite3_expert_destroy(sqlite3expert*);
 
 #endif  /* !defined(SQLITEEXPERT_H) */
 /**************** End <projectDir>/ext/expert/sqlite3expert.h ****************/
-#line 1092 "Z:/lib/tooling/qiqqa/MuPDF/thirdparty/owemdjee/sqlite/src/shell.c.in"
-#line 1 "Z:/lib/tooling/qiqqa/MuPDF/thirdparty/owemdjee/sqlite/src/../ext/expert/sqlite3expert.c"
 /*************** Begin <projectDir>/ext/expert/sqlite3expert.c ***************/
 /*
 ** 2017 April 09
@@ -11561,10 +11527,8 @@ void sqlite3_expert_destroy(sqlite3expert *p){
 
 #endif /* ifndef SQLITE_OMIT_VIRTUALTABLE */
 /**************** End <projectDir>/ext/expert/sqlite3expert.c ****************/
-#line 1093 "Z:/lib/tooling/qiqqa/MuPDF/thirdparty/owemdjee/sqlite/src/shell.c.in"
 
 #if !defined(SQLITE_OMIT_VIRTUALTABLE) && defined(SQLITE_ENABLE_DBPAGE_VTAB)
-#line 1 "Z:/lib/tooling/qiqqa/MuPDF/thirdparty/owemdjee/sqlite/src/../ext/misc/dbdata.c"
 /******************* Begin <projectDir>/ext/misc/dbdata.c *******************/
 /*
 ** 2019-04-17
@@ -12418,7 +12382,6 @@ int sqlite3_dbdata_init(
   return sqlite3DbdataRegister(db);
 }
 /******************** End <projectDir>/ext/misc/dbdata.c ********************/
-#line 1096 "Z:/lib/tooling/qiqqa/MuPDF/thirdparty/owemdjee/sqlite/src/shell.c.in"
 #endif
 
 #if defined(SQLITE_ENABLE_SESSION)
@@ -15466,7 +15429,7 @@ static void showPrimaryHelp(FILE *out, const char *zCmd){
 static int showHelp(FILE *out, const char *zPattern){
   int npm = 0;
   char *zPat = sqlite3_mprintf(".%s*", zPattern? zPattern : "");
-  const char **pzHxtra;
+  const char **pzHxtra = NULL;
   const char **pzH;
   int nma = 0;
   shell_check_oom(zPat);
@@ -18114,7 +18077,6 @@ end_ar_command:
 *******************************************************************************/
 #endif /* !defined(SQLITE_OMIT_VIRTUALTABLE) && defined(SQLITE_HAVE_ZLIB) */
 
-#if !defined(SQLITE_OMIT_VIRTUALTABLE) && defined(SQLITE_ENABLE_DBPAGE_VTAB)
 /*
 ** If (*pRc) is not SQLITE_OK when this function is called, it is a no-op.
 ** Otherwise, the SQL statement or statements in zSql are executed using
@@ -18196,6 +18158,8 @@ static char *shellMPrintf(int *pRc, const char *zFmt, ...){
   }
   return z;
 }
+
+#if !defined(SQLITE_OMIT_VIRTUALTABLE)
 
 /*
 ** When running the ".recover" command, each output table, and the special
@@ -18960,6 +18924,7 @@ static int eqpCommand(char *azArg[], int nArg, ShellState *p, char **pzErr){
     }else{
       p->autoEQP = (u8)booleanValue(azArg[1]);
     }
+	return 0;
   }else{
     return SHELL_INVALID_ARGS;
   }
@@ -21511,12 +21476,14 @@ static int testcaseCommand(char *azArg[], int nArg, ShellState *p, char **pzErr)
   p->out = output_file_open("testcase-out.txt", 0);
   if( p->out==0 ){
     raw_printf(STD_ERR, "Error: cannot open 'testcase-out.txt'\n");
+	return SHELL_INVALID_ARGS;
   }
   if( nArg>=2 ){
     sqlite3_snprintf(sizeof(p->zTestcase), p->zTestcase, "%s", azArg[1]);
   }else{
     sqlite3_snprintf(sizeof(p->zTestcase), p->zTestcase, "?");
   }
+  return 0;
 }
 #ifndef SQLITE_UNTESTABLE
 static int testctrlCommand(char *azArg[], int nArg, ShellState *p, char **pzErr){
@@ -22102,7 +22069,7 @@ static unsigned numCommands
 ** There must be two or more spaces between the end of the command and the
 ** start of the description of what that command does.
 */
-static const char *(azHelp[]) = {
+static const char *__azHelp[] = {
 /* Template for help text indents and length:
   ".whatever ?arg? ...      Summary of effects (limited to this line's length)",
   "   ^ ^                   ^  ^                                              ",
@@ -22449,6 +22416,8 @@ static const char *(azHelp[]) = {
   "",
   0 /* Sentinel */
 };
+// fix for MSVC being incapable of coping with unknown-dimension static forward reference:
+static const char** azHelp = __azHelp;
 
 
 #define NO_SUCH_COMMAND SQLITE_NOTFOUND
@@ -23001,7 +22970,7 @@ static char *find_home_dir(int clearFlag){
 ** This is a convenience function, used in several places, all of
 ** demand a shell exit upon failure, which leads to return 2.
  */
-static int run_single_query(ShellState *p, char *zSql){
+static int run_single_query(ShellState *p, const char *zSql){
   char *zErrMsg = 0;
   int rc;
   open_db(p, 0);
@@ -23804,7 +23773,7 @@ int SQLITE_CDECL SHELL_MAIN(int argc, const wchar_t **wargv){
   free(data.colWidth);
   free(data.zNonce);
   /* Freed ShellState objects so that valgrind detects real memory leaks. */
-  free(azCmd);
+  free((void *)azCmd);
   /* Process exit codes to yield single shell exit code. 
    * rc == 2 is a quit signal, resulting in no error by itself.
    * data.bAbruptExit conveys either an normal (success or error) exit
