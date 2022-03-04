@@ -1223,7 +1223,7 @@ static void shellModuleSchema(
   char *zFake;
   UNUSED_PARAMETER(nVal);
   zName = (const char*)sqlite3_value_text(apVal[0]);
-  zFake = zName? shellFakeSchema(sqlite3_context_db_handle(pCtx), 0, zName) : 0;
+  zFake = zName ? shellFakeSchema(sqlite3_context_db_handle(pCtx), 0, zName) : 0;
   if( zFake ){
     sqlite3_result_text(pCtx, sqlite3_mprintf("/* %s */", zFake),
                         -1, sqlite3_free);
@@ -20330,12 +20330,10 @@ static int modeCommand(char *azArg[], int nArg, ShellState *p, char **pzErr){
                           "  --wordwrap on/off\n"
                           "  --wrap N\n"
                           "  --ww\n");
-      rc = 1;
-      goto meta_command_exit;
+      return 1;
     }else{
       utf8_printf(stderr, "extra argument: \"%s\"\n", z);
-      rc = 1;
-      goto meta_command_exit;
+      return 1;
     }
   }
   if( zMode==0 ){
