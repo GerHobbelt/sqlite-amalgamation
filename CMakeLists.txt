@@ -17,7 +17,6 @@ option(SQLITE_ENABLE_FTS4           "enables full text searches version 3 & 4"  
 option(SQLITE_ENABLE_FTS5           "enables full text searches version 5"            ON)
 option(SQLITE_ENABLE_GEOPOLY        "enables Geopoly extension"                       OFF)
 option(SQLITE_ENABLE_ICU            "enables international components for unicode"    OFF)
-option(SQLITE_ENABLE_JSON1          "enables JSON SQL functions"                      ON)
 option(SQLITE_ENABLE_MATH_FUNCTIONS "enables the built-in SQL math functions"         ON)
 option(SQLITE_ENABLE_RBU            "enables resumable bulk update extension"         ON)
 option(SQLITE_ENABLE_RTREE          "enables R*TRee index extension"                  ON)
@@ -61,6 +60,8 @@ option(SQLITE_ENABLE_SORTER_REFERENCES       "enables the external sort optimiza
 option(SQLITE_DEFAULT_AUTOMATIC_INDEX        "enables automatic indexes"     OFF)
 option(SQLITE_DEFAULT_AUTOVACUUM             "enables automatic 'PRAGMA auto_vacuum = 1' for all tables"     OFF)
 option(SQLITE_UNLINK_AFTER_CLOSE             "enables the delete-on-close feature"     ON)
+option(SQLITE_OMIT_DECLTYPE                  "omit declared type of columns"                   ON)
+option(SQLITE_OMIT_JSON                      "disables JSON SQL functions"                     OFF)
 
 option(SQLITE_RECOMMENDED_OPTIONS   "compile by SQLite3 recommended options"          ON)
 

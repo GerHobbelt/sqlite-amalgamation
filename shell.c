@@ -12696,6 +12696,7 @@ static int failIfSafeMode(
     va_end(ap);
     raw_printf(STD_ERR, "line %d: ", p->lineno);
     utf8_printf(STD_ERR, "%s\n", zMsg);
+    sqlite3_free(zMsg);
     p->abruptExit = 3;
     return 1;
   }
@@ -15150,6 +15151,7 @@ static int expertDotCommand(
       );
     }
   }
+  sqlite3_free(zErr);
 
   return rc;
 }
@@ -17048,6 +17050,7 @@ static int shell_dbinfo_command(ShellState *p, int nArg, char **azArg){
 static int shellDatabaseError(sqlite3 *db){
   const char *zErr = sqlite3_errmsg(db);
   utf8_printf(STD_ERR, "Error: %s\n", zErr);
+  sqlite3_free(zErr);
   return 1;
 }
 
@@ -23108,7 +23111,6 @@ static int do_meta_command(char *zLine, ShellState *p){
         utf8_printf
           (STD_ERR,
            "Error: \".%s\" may not %s in --safe mode\n", azArg[0], zErr);
-        sqlite3_free(zErr);
       }else {
         utf8_printf(STD_ERR,
                     "Error: \".%s\" forbidden in --safe mode\n", azArg[0]);
@@ -23119,9 +23121,9 @@ static int do_meta_command(char *zLine, ShellState *p){
       if( 0!=dispatchResult ) rc = 1;
       if( zErr!=0 ){
         utf8_printf(STD_ERR, "%s", zErr);
-        sqlite3_free(zErr);
       }
     }
+    sqlite3_free(zErr);
   }
 
 meta_command_exit:
@@ -23521,7 +23523,7 @@ static int run_single_query(ShellState *p, const char *zSql){
     /* Some kind of error, to result in exit before REPL. */
     if( zErrMsg!=0 ){
       utf8_printf(STD_ERR,"Error: %s\n", zErrMsg);
-      free(zErrMsg);
+      sqlite3_free(zErr);
     }else{
       utf8_printf(STD_ERR,"Error: unable to process SQL \"%s\"\n", zSql);
     }
