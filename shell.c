@@ -17050,7 +17050,6 @@ static int shell_dbinfo_command(ShellState *p, int nArg, char **azArg){
 static int shellDatabaseError(sqlite3 *db){
   const char *zErr = sqlite3_errmsg(db);
   utf8_printf(STD_ERR, "Error: %s\n", zErr);
-  sqlite3_free(zErr);
   return 1;
 }
 
@@ -18968,7 +18967,7 @@ static int seeargsCommand(char *azArg[], int nArg, ShellState *p, char **pzErr){
 /*****************
  * The .archive command
  */
-#ifndef SQLITE_OMIT_VIRTUALTABLE
+#if (!defined(SQLITE_OMIT_VIRTUALTABLE) && defined(SQLITE_HAVE_ZLIB))
 static int archiveCommand(char *azArg[], int nArg, ShellState *p, char **pzErr){
   open_db(p, 0);
   if( p->bSafeMode ) return SHELL_FORBIDDEN_OP;
@@ -22465,7 +22464,7 @@ static struct CommandInfo {
   void * pCmdData;
 #endif
 } command_table[] = {
-#ifndef SQLITE_OMIT_VIRTUALTABLE
+#if (!defined(SQLITE_OMIT_VIRTUALTABLE) && defined(SQLITE_HAVE_ZLIB))
   { "archive", archiveCommand, 0, 3, 0 },
 #endif
 #ifndef SQLITE_OMIT_AUTHORIZATION
@@ -22593,7 +22592,7 @@ static const char *__azHelp[] = {
   ".whatever ?arg? ...      Summary of effects (limited to this line's length)",
   "   ^ ^                   ^  ^                                              ",
 */
-#ifndef SQLITE_OMIT_VIRTUALTABLE
+#if (!defined(SQLITE_OMIT_VIRTUALTABLE) && defined(SQLITE_HAVE_ZLIB))
   ".archive ...             Manage SQL archives\n",
   "   Each command must have exactly one of the following options:\n"
   "     -c, --create               Create a new archive\n"
@@ -23126,7 +23125,6 @@ static int do_meta_command(char *zLine, ShellState *p){
     sqlite3_free(zErr);
   }
 
-meta_command_exit:
   if( p->outCount ){
     p->outCount--;
     if( p->outCount==0 ) output_reset(p);
@@ -23523,7 +23521,7 @@ static int run_single_query(ShellState *p, const char *zSql){
     /* Some kind of error, to result in exit before REPL. */
     if( zErrMsg!=0 ){
       utf8_printf(STD_ERR,"Error: %s\n", zErrMsg);
-      sqlite3_free(zErr);
+      sqlite3_free(zErrMsg);
     }else{
       utf8_printf(STD_ERR,"Error: unable to process SQL \"%s\"\n", zSql);
     }

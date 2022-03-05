@@ -121,7 +121,7 @@ install(FILES
 # SQLite3 shell application:
 option(BUILD_SHELL "build SQLite3 shell application" ON)
 if(BUILD_SHELL)
-    add_executable(shell_app shell.c sqlite3.h ${CMAKE_BINARY_DIR}/sqlite3_config.h)
+    add_executable(shell_app shell.c user_code.c sqlite3.h ${CMAKE_BINARY_DIR}/sqlite3_config.h)
     set_target_properties(shell_app PROPERTIES OUTPUT_NAME sqlite3)
 	target_include_directories(shell_app PRIVATE ${CMAKE_BINARY_DIR})
     target_link_libraries(shell_app PRIVATE ${PROJECT_NAME})
