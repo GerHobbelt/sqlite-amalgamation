@@ -12866,9 +12866,9 @@ static void outputModePop(ShellState *p){
 static void output_hex_blob(FILE *out, const void *pBlob, int nBlob){
   int i;
   char *zBlob = (char *)pBlob;
-  raw_printf(out,"X'");
-  for(i=0; i<nBlob; i++){ raw_printf(out,"%02x",zBlob[i]&0xff); }
-  raw_printf(out,"'");
+  raw_printf(out, "X'");
+  for(i=0; i<nBlob; i++){ raw_printf(out, "%02x",zBlob[i]&0xff); }
+  raw_printf(out, "'");
 }
 
 /*
@@ -15012,7 +15012,7 @@ static void exec_prepared_stmt(
       if( pArg->cMode==MODE_Json ){
         fputs("]\n", pArg->out);
       }else if( pArg->cMode==MODE_Count ){
-        printf("%llu row%s\n", nRow, nRow!=1 ? "s" : "");
+        fprintf(pArg->out ? pArg->out : STD_OUT, "%llu row%s\n", nRow, nRow!=1 ? "s" : "");
       }
     }
   }
