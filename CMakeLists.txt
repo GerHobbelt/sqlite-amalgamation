@@ -118,8 +118,8 @@ install(FILES
     )
 
 #------------------------------------------------------------------------------
-# SQLite3 shell application:
-option(BUILD_SHELL "build SQLite3 shell application" ON)
+# SQLite3 shell + analyzer + checker applications:
+option(BUILD_SHELL "build SQLite3 shell + analyzer + checker applications" ON)
 if(BUILD_SHELL)
     add_executable(shell_app shell.c user_code.c sqlite3.h ${CMAKE_BINARY_DIR}/sqlite3_config.h)
     set_target_properties(shell_app PROPERTIES OUTPUT_NAME sqlite3)
@@ -143,6 +143,60 @@ if(BUILD_SHELL)
         endforeach()
     endif()
     install(TARGETS shell_app
+        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+        )
+
+
+    #------------------------------------------------------------------------------
+    add_executable(analyzer_app sqlite3_analyzer.c user_code.c sqlite3.h ${CMAKE_BINARY_DIR}/sqlite3_config.h)
+    set_target_properties(analyzer_app PROPERTIES OUTPUT_NAME sqlite3_analyzer)
+	target_include_directories(analyzer_app PRIVATE ${CMAKE_BINARY_DIR})
+    target_link_libraries(analyzer_app PRIVATE ${PROJECT_NAME})
+    if(UNIX)
+        if(CMAKE_BUILD_TYPE STREQUAL Release)
+            add_custom_command(TARGET analyzer_app POST_BUILD
+                COMMAND ${CMAKE_STRIP} sqlite3_analyzer
+                )
+        endif()
+    elseif(MSVC)
+        option(BUILD_SHELL_STATIC "build sqlite3_analyzer by static c/c++ runtime" ON)
+        foreach(flag CMAKE_C_FLAGS_RELEASE CMAKE_C_FLAGS_MINSIZEREL CMAKE_C_FLAGS_DEBUG)
+            if(BUILD_SHELL_STATIC)
+                string(REGEX REPLACE "/MD" "/MT" ${flag} "${${flag}}")
+            else()
+                string(REGEX REPLACE "/MT" "/MD" ${flag} "${${flag}}")
+            endif()
+            set(${flag} "${${flag}}" CACHE STRING "msvc flags" FORCE)
+        endforeach()
+    endif()
+    install(TARGETS analyzer_app
+        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+        )
+
+
+    #------------------------------------------------------------------------------
+    add_executable(checker_app sqlite3_checker.c user_code.c sqlite3.h ${CMAKE_BINARY_DIR}/sqlite3_config.h)
+    set_target_properties(checker_app PROPERTIES OUTPUT_NAME sqlite3_checker)
+	target_include_directories(checker_app PRIVATE ${CMAKE_BINARY_DIR})
+    target_link_libraries(checker_app PRIVATE ${PROJECT_NAME})
+    if(UNIX)
+        if(CMAKE_BUILD_TYPE STREQUAL Release)
+            add_custom_command(TARGET checker_app POST_BUILD
+                COMMAND ${CMAKE_STRIP} sqlite3_checker
+                )
+        endif()
+    elseif(MSVC)
+        option(BUILD_SHELL_STATIC "build sqlite3_checker by static c/c++ runtime" ON)
+        foreach(flag CMAKE_C_FLAGS_RELEASE CMAKE_C_FLAGS_MINSIZEREL CMAKE_C_FLAGS_DEBUG)
+            if(BUILD_SHELL_STATIC)
+                string(REGEX REPLACE "/MD" "/MT" ${flag} "${${flag}}")
+            else()
+                string(REGEX REPLACE "/MT" "/MD" ${flag} "${${flag}}")
+            endif()
+            set(${flag} "${${flag}}" CACHE STRING "msvc flags" FORCE)
+        endforeach()
+    endif()
+    install(TARGETS checker_app
         RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
         )
 endif()
