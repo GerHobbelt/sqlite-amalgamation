@@ -148,7 +148,7 @@ extern "C" {
 */
 #define SQLITE_VERSION        "3.39.0"
 #define SQLITE_VERSION_NUMBER 3039000
-#define SQLITE_SOURCE_ID      "2022-03-06 11:43:06 e1a185e60afd32d3b25278dee42049920759ccd8fe709161007f5daa4a04alt1"
+#define SQLITE_SOURCE_ID      "2022-03-22 23:33:20 a85126f96614c53b030c6e6c43ff239eae458048597a10e9a0361fcec862alt1"
 
 /*
 ** CAPI3REF: Run-Time Library Version Numbers
@@ -4979,6 +4979,10 @@ SQLITE_API int sqlite3_data_count(sqlite3_stmt *pStmt);
 ** even empty strings, are always zero-terminated.  ^The return
 ** value from sqlite3_column_blob() for a zero-length BLOB is a NULL pointer.
 **
+** ^Strings returned by sqlite3_column_text16() always have the endianness
+** which is native to the platform, regardless of the text encoding set
+** for the database.
+**
 ** <b>Warning:</b> ^The object returned by [sqlite3_column_value()] is an
 ** [unprotected sqlite3_value] object.  In a multithreaded environment,
 ** an unprotected sqlite3_value object may only be used safely with
@@ -4992,7 +4996,7 @@ SQLITE_API int sqlite3_data_count(sqlite3_stmt *pStmt);
 ** [application-defined SQL functions] or [virtual tables], not within
 ** top-level application code.
 **
-** The these routines may attempt to convert the datatype of the result.
+** These routines may attempt to convert the datatype of the result.
 ** ^For example, if the internal representation is FLOAT and a text result
 ** is requested, [sqlite3_snprintf()] is used internally to perform the
 ** conversion automatically.  ^(The following table details the conversions
@@ -5017,7 +5021,7 @@ SQLITE_API int sqlite3_data_count(sqlite3_stmt *pStmt);
 ** <tr><td>  TEXT    <td>   BLOB    <td> No change
 ** <tr><td>  BLOB    <td> INTEGER   <td> [CAST] to INTEGER
 ** <tr><td>  BLOB    <td>  FLOAT    <td> [CAST] to REAL
-** <tr><td>  BLOB    <td>   TEXT    <td> Add a zero terminator if needed
+** <tr><td>  BLOB    <td>   TEXT    <td> [CAST] to TEXT, ensure zero terminator
 ** </table>
 ** </blockquote>)^
 **
@@ -5589,7 +5593,8 @@ SQLITE_API unsigned int sqlite3_value_subtype(sqlite3_value*);
 ** object D and returns a pointer to that copy.  ^The [sqlite3_value] returned
 ** is a [protected sqlite3_value] object even if the input is not.
 ** ^The sqlite3_value_dup(V) interface returns NULL if V is NULL or if a
-** memory allocation fails.
+** memory allocation fails. ^If V is a [pointer value], then the result
+** of sqlite3_value_dup(V) is a NULL value.
 **
 ** ^The sqlite3_value_free(V) interface frees an [sqlite3_value] object
 ** previously obtained from [sqlite3_value_dup()].  ^If V is a NULL pointer
@@ -9550,8 +9555,8 @@ SQLITE_API SQLITE_EXPERIMENTAL const char *sqlite3_vtab_collation(sqlite3_index_
 ** of a [virtual table] implementation. The result of calling this
 ** interface from outside of xBestIndex() is undefined and probably harmful.
 **
-** ^The sqlite3_vtab_distinct() interface returns an integer that is
-** either 0, 1, or 2.  The integer returned by sqlite3_vtab_distinct()
+** ^The sqlite3_vtab_distinct() interface returns an integer between 0 and
+** 3.  The integer returned by sqlite3_vtab_distinct()
 ** gives the virtual table additional information about how the query
 ** planner wants the output to be ordered. As long as the virtual table
 ** can meet the ordering requirements of the query planner, it may set
@@ -9583,6 +9588,13 @@ SQLITE_API SQLITE_EXPERIMENTAL const char *sqlite3_vtab_collation(sqlite3_index_
 ** that have the same value for all columns identified by "aOrderBy".
 ** ^However omitting the extra rows is optional.
 ** This mode is used for a DISTINCT query.
+** <li value="3"><p>
+** ^(If the sqlite3_vtab_distinct() interface returns 3, that means
+** that the query planner needs only distinct rows but it does need the
+** rows to be sorted.)^ ^The virtual table implementation is free to omit
+** rows that are identical in all aOrderBy columns, if it wants to, but
+** it is not required to omit any rows.  This mode is used for queries
+** that have both DISTINCT and ORDER BY clauses.
 ** </ol>
 **
 ** ^For the purposes of comparing virtual table output values to see if the
