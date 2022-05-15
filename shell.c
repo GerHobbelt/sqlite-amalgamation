@@ -5482,6 +5482,9 @@ int sqlite3_decimal_init(
 **     ieee754(2, 0)            ->     2.0
 **     ieee754(181, -2)         ->     45.25
 **
+**     ieee754(4503599627370496,972)  ->   +Inf
+**     ieee754(4503599627370496,972)  ->   -Inf
+**
 ** Two additional functions break apart the one-argument ieee754()
 ** result into separate integer values:
 **
@@ -12579,10 +12582,11 @@ static void updateSafeMode(ShellState *pSS){
 #define SHFLG_PreserveRowid  0x00000008 /* .dump preserves rowid values */
 #define SHFLG_Newlines       0x00000010 /* .dump --newline flag */
 #define SHFLG_CountChanges   0x00000020 /* .changes setting */
-#define SHFLG_Echo           0x00000040 /* .echo or --echo setting */
+#define SHFLG_Echo           0x00000040 /* .echo on/off, or --echo setting */
 #define SHFLG_HeaderSet      0x00000080 /* showHeader has been specified */
 #define SHFLG_DumpDataOnly   0x00000100 /* .dump show data only */
 #define SHFLG_DumpNoSys      0x00000200 /* .dump omits system tables */
+#define SHFLG_UseIeee754Func 0x00000400 /* .dump --ieee754 flag */
 
 /*
 ** Macros for testing and setting shellFlgs
@@ -13710,22 +13714,53 @@ static int shell_callback(
         }else if( aiType && aiType[i]==SQLITE_INTEGER ){
           utf8_printf(p->out,"%s", azArg[i]);
         }else if( aiType && aiType[i]==SQLITE_FLOAT ){
-          char z[50];
-          double r = sqlite3_column_double(p->pStmt, i);
-          sqlite3_uint64 ur;
-          memcpy(&ur,&r,sizeof(r));
-          if( ur==0x7ff0000000000000LL ){
-            raw_printf(p->out, "1e999");
-          }else if( ur==0xfff0000000000000LL ){
-            raw_printf(p->out, "-1e999");
-          }else{
-            sqlite3_int64 ir = (sqlite3_int64)r;
-            if( r==(double)ir ){
-              sqlite3_snprintf(50,z,"%lld.0", ir);
+          sqlite3_int64 m, a;
+          double r;
+          int e;
+          int isNeg;
+          char z[100];
+          assert( sizeof(m)==sizeof(r) );
+          r = sqlite3_column_double(p->pStmt, i);
+          if( ShellHasFlag(p, SHFLG_UseIeee754Func) ){
+            if( r<0.0 ){
+              isNeg = 1;
+              r = -r;
             }else{
-              sqlite3_snprintf(50,z,"%!.20g", r);
+              isNeg = 0;
             }
+            memcpy(&a,&r,sizeof(a));
+            if( a==0 ){
+              e = 0;
+              m = 0;
+            }else{
+              e = a>>52;
+              m = a & ((((sqlite3_int64)1)<<52)-1);
+              m |= ((sqlite3_int64)1)<<52;
+              while( e<1075 && m>0 && (m&1)==0 ){
+                m >>= 1;
+                e++;
+              }
+              if( isNeg ) m = -m;
+            }
+            sqlite3_snprintf(sizeof(z), z, "ieee754(%lld,%d)",
+                             m, e-1075);
             raw_printf(p->out, "%s", z);
+          }else{
+            sqlite3_uint64 ur;
+            memcpy(&ur,&r,sizeof(r));
+            if( ur==0x7ff0000000000000LL ){
+              raw_printf(p->out, "1e999");
+            }else if( ur==0xfff0000000000000LL ){
+              raw_printf(p->out, "-1e999");
+            }else{
+              sqlite3_int64 ir = (sqlite3_int64)r;
+              if( r==(double)ir ){
+                sqlite3_snprintf(50,z,"%lld.0", ir);
+              }else{
+                sqlite3_snprintf(50,z,"%!.20g", r);
+              }
+              raw_printf(p->out, "%s", z);
+            }
           }
         }else if( aiType && aiType[i]==SQLITE_BLOB && p->pStmt ){
           const void *pBlob = sqlite3_column_blob(p->pStmt, i);
@@ -15233,11 +15268,6 @@ static int shell_exec(
       if( pArg ){
         pArg->pStmt = pStmt;
         pArg->cnt = 0;
-      }
-
-      /* echo the sql statement if echo on */
-      if( pArg && ShellHasFlag(pArg, SHFLG_Echo) ){
-        utf8_printf(pArg->out, "%s\n", zStmtSql ? zStmtSql : zSql);
       }
 
       /* Show the EXPLAIN QUERY PLAN if .eqp is on */
@@ -19256,7 +19286,7 @@ static int dumpCommand(char *azArg[], int nArg, ShellState *p, char **pzErr){
   int savedShellFlags = p->shellFlgs;
   ShellClearFlag(p, 
      SHFLG_PreserveRowid|SHFLG_Newlines|SHFLG_Echo
-     |SHFLG_DumpDataOnly|SHFLG_DumpNoSys);
+     |SHFLG_DumpDataOnly|SHFLG_DumpNoSys|SHFLG_UseIeee754Func);
   for(i=1; i<nArg; i++){
     if( azArg[i][0]=='-' ){
       const char *z = azArg[i]+1;
@@ -19274,6 +19304,9 @@ static int dumpCommand(char *azArg[], int nArg, ShellState *p, char **pzErr){
       }else{
         if( strcmp(z,"newlines")==0 ){
           ShellSetFlag(p, SHFLG_Newlines);
+        }else
+        if( strcmp(z,"ieee754")==0 ){
+          ShellSetFlag(p, SHFLG_UseIeee754Func);
         }else if( strcmp(z,"data-only")==0 ){
           ShellSetFlag(p, SHFLG_DumpDataOnly);
         }else if( strcmp(z,"nosys")==0 ){
@@ -19804,7 +19837,6 @@ static int importCommand(char *azArg[], int nArg, ShellState *p, char **pzErr){
   int nSkip = 0;              /* Initial lines to skip */
   int useOutputMode = 1;      /* Use output mode to determine separators */
   char *zCreate = 0;          /* CREATE TABLE statement text */
-  int rc = 1;
 
   if(p->bSafeMode) return SHELL_FORBIDDEN_OP;
   memset(&sCtx, 0, sizeof(sCtx));
@@ -19911,7 +19943,6 @@ static int importCommand(char *azArg[], int nArg, ShellState *p, char **pzErr){
     import_cleanup(&sCtx);
     return 1;
   }
-  rc = 0;
   if( eVerbose>=2 || (eVerbose>=1 && useOutputMode) ){
     char zSep[2];
     zSep[1] = 0;
@@ -19923,10 +19954,10 @@ static int importCommand(char *azArg[], int nArg, ShellState *p, char **pzErr){
     output_c_string(p->out, zSep);
     utf8_printf(p->out, "\n");
   }
-    sCtx.z = sqlite3_malloc64(120);
-    if( sCtx.z==0 ){
-      import_cleanup(&sCtx);
-      shell_out_of_memory();
+  sCtx.z = sqlite3_malloc64(120);
+  if( sCtx.z==0 ){
+    import_cleanup(&sCtx);
+    shell_out_of_memory();
   }
   /* Below, resources must be freed before exit. */
   while( (nSkip--)>0 ){
@@ -19943,7 +19974,7 @@ static int importCommand(char *azArg[], int nArg, ShellState *p, char **pzErr){
     shell_out_of_memory();
   }
   nByte = strlen30(zSql);
-  rc = sqlite3_prepare_v2(p->db, zSql, -1, &pStmt, 0);
+  int rc = sqlite3_prepare_v2(p->db, zSql, -1, &pStmt, 0);
   import_append_char(&sCtx, 0);    /* To ensure sCtx.z is allocated */
   if( rc && sqlite3_strglob("no such table: *", sqlite3_errmsg(p->db))==0 ){
     sqlite3 *dbCols = 0;
@@ -23267,7 +23298,7 @@ static QuickScanState quickscan(char *zLine, QuickScanState qss){
           cWait = 0;
           qss = QSS_SETV(qss, 0);
           goto PlainScan;
-        default: assert(0); 
+        default: assert(0);
         }
       }
     }
@@ -23288,7 +23319,7 @@ static int line_is_command_terminator(char *zLine){
     zLine += 2; /* SQL Server */
   else
     return 0;
-  return quickscan(zLine,QSS_Start)==QSS_Start;
+  return quickscan(zLine, QSS_Start)==QSS_Start;
 }
 
 /*
@@ -23365,6 +23396,9 @@ static int runOneSqlLine(ShellState *p, char *zSql, FILE *in, int startline){
   return 0;
 }
 
+static void echo_group_input(ShellState *p, const char *zDo){
+  if( ShellHasFlag(p, SHFLG_Echo) ) utf8_printf(p->out, "%s\n", zDo);
+}
 
 /*
 ** Read input from *in and process it.  If *in==0 then input
@@ -23417,14 +23451,13 @@ static int process_input(ShellState *p){
     }
     qss = quickscan(zLine, qss);
     if( QSS_PLAINWHITE(qss) && nSql==0 ){
-      if( ShellHasFlag(p, SHFLG_Echo) )
-        fprintf(STD_OUT, "%s\n", zLine);
       /* Just swallow single-line whitespace */
+      echo_group_input(p, zLine);
       qss = QSS_Start;
       continue;
     }
     if( zLine && (zLine[0]=='.' || zLine[0]=='#') && nSql==0 ){
-      if( ShellHasFlag(p, SHFLG_Echo) ) fprintf(STD_OUT, "%s\n", zLine);
+      echo_group_input(p, zLine);
       if( zLine[0]=='.' ){
         char* line = strdup(zLine);
         rc = do_meta_command(line, p);
@@ -23459,6 +23492,7 @@ static int process_input(ShellState *p){
       nSql += nLine;
     }
     if( nSql && QSS_SEMITERM(qss) && sqlite3_complete(zSql) ){
+      echo_group_input(p, zSql);
       errCnt += runOneSqlLine(p, zSql, p->in, startline);
       nSql = 0;
       if( p->outCount ){
@@ -23470,13 +23504,14 @@ static int process_input(ShellState *p){
       updateSafeMode(p);
       qss = QSS_Start;
     }else if( nSql && QSS_PLAINWHITE(qss) ){
-      if( ShellHasFlag(p, SHFLG_Echo) ) fprintf(STD_OUT, "%s\n", zSql);
+      echo_group_input(p, zSql);
       nSql = 0;
       qss = QSS_Start;
     }
   }
   if( nSql ){
     /* This may be incomplete. Let the SQL parser deal with that. */
+    echo_group_input(p, zSql);
     errCnt += runOneSqlLine(p, zSql, p->in, startline);
     updateSafeMode(p);
   }
@@ -23644,7 +23679,7 @@ static const char *zOptions =
 #if !defined(SQLITE_OMIT_DESERIALIZE)
   "   -deserialize         open the database using sqlite3_deserialize()\n"
 #endif
-  "   -echo                print commands before execution\n"
+  "   -echo                print inputs before execution\n"
   "   -init FILENAME       read/process named file\n"
   "   -[no]header          turn headers on or off\n"
 #if defined(SQLITE_ENABLE_MEMSYS3) || defined(SQLITE_ENABLE_MEMSYS5)
