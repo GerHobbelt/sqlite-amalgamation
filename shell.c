@@ -678,7 +678,7 @@ static void endTimer(void){
 static int bail_on_error = 0;
 
 /*
-** Threat stdin as an interactive input if the following variable
+** Treat stdin as an interactive input if the following variable
 ** is true.  Otherwise, assume stdin is connected to a file or pipe.
 */
 static int stdin_is_interactive = 1;
@@ -729,7 +729,7 @@ void utf8_printf(FILE *out, const char *zFormat, ...){
     char *z1 = sqlite3_vmprintf(zFormat, ap);
     char *z2 = sqlite3_win32_utf8_to_mbcs_v2(z1, 0);
     sqlite3_free(z1);
-    fputs(z2, out);
+    if( z2 ) fputs(z2, out);
     sqlite3_free(z2);
   }else{
     vfprintf(out, zFormat, ap);
@@ -771,6 +771,7 @@ static void shell_out_of_memory(void){
 static void shell_check_oom(const void *p){
   if( p==0 ) shell_out_of_memory();
 }
+
 /* This pattern is ubiquitous and subject to change, so encapsulate it. */
 #define SHELL_ASSIGN_OOM_CHECK(lv, pv) lv = pv, shell_check_oom(lv)
 
@@ -918,9 +919,10 @@ static FILE * openChrSource(const char *zFile){
 }
 
 /*
-** This routine reads a line of text from FILE in, stores it in
-** memory obtained from malloc() and returns a pointer to it.
-** NULL is returned at end of file, or if malloc() fails.
+** This routine reads a line of text from FILE in, stores
+** the text in memory obtained from malloc() and returns a pointer
+** to the text.  NULL is returned at end of file, or if malloc()
+** fails.
 **
 ** If zLine is not NULL then it is (and must be) a malloced buffer
 ** returned from a previous call to this routine that may be reused.
@@ -12688,7 +12690,8 @@ static void shellPutsFunc(
 ** the caller of the shell's main, "do shell things" entry point.
 **
 ** It is an error, (perhaps with only minor effect such as memory leak),
-** for a meta-command to call this function while it holds resources.
+** for a meta-command to call this function while it holds resources in
+** need of freeing. Instead, it should be called before acquiring them.
 **
 ** The return is true if failing, 0 otherwise.
 */
@@ -12697,7 +12700,7 @@ static int failIfSafeMode(
   const char *zErrMsg,
   ...
 ){
-  if( p->bSafeMode==1 ){
+  if( p->bSafeMode ){
     va_list ap;
     char *zMsg;
     va_start(ap, zErrMsg);
@@ -14352,6 +14355,9 @@ static int str_in_array(const char *zStr, const char **azArray){
 **       all opcodes that occur between the p2 jump destination and the opcode
 **       itself by 2 spaces.
 **
+**     * Do the previous for "Return" instructions for when P2 is positive.
+**       See tag-20220407a in wherecode.c and vdbe.c.
+**
 **     * For each "Goto", if the jump destination is earlier in the program
 **       and ends on one of:
 **          Yield  SeekGt  SeekLt  RowSetRead  Rewind
@@ -14366,7 +14372,8 @@ static void explain_data_prepare(ShellState *p, sqlite3_stmt *pSql){
   int nAlloc = 0;                 /* Allocated size of p->aiIndent[], abYield */
   int iOp;                        /* Index of operation in p->aiIndent[] */
 
-  const char *azNext[] = { "Next", "Prev", "VPrev", "VNext", "SorterNext", 0 };
+  const char *azNext[] = { "Next", "Prev", "VPrev", "VNext", "SorterNext",
+                           "Return", 0 };
   const char *azYield[] = { "Yield", "SeekLT", "SeekGT", "RowSetRead",
                             "Rewind", 0 };
   const char *azGoto[] = { "Goto", 0 };
@@ -14424,7 +14431,7 @@ static void explain_data_prepare(ShellState *p, sqlite3_stmt *pSql){
     p->aiIndent[iOp] = 0;
     p->nIndent = iOp+1;
 
-    if( str_in_array(zOp, azNext) ){
+    if( str_in_array(zOp, azNext) && p2op>0 ){
       for(i=p2op; i<iOp; i++) p->aiIndent[i] += 2;
     }
     if( str_in_array(zOp, azGoto) && p2op<p->nIndent
@@ -14450,7 +14457,7 @@ static void explain_data_delete(ShellState *p){
 }
 
 /*
-** Disable and restore .wheretrace and .selecttrace settings.
+** Disable and restore .wheretrace and .treetrace/.selecttrace settings.
 */
 static unsigned int savedSelectTrace;
 static unsigned int savedWhereTrace;
@@ -15114,10 +15121,10 @@ static int expertDotCommand(
   int iSample = 0;
 
   if( pState->bSafeMode ){
-    raw_printf(stderr, 
+    raw_printf(STD_ERR, 
                "Cannot run experimental commands such as \"%s\" in safe mode\n",
                azArg[0]);
-    return 1;
+    return SQLITE_ERROR;
   }
   assert( pState->expert.pExpert==0 );
   memset(&pState->expert, 0, sizeof(ExpertInfo));
@@ -18800,12 +18807,12 @@ SELECT\
   ','||iif((cpos-1)%4>0, ' ', x'0a'||' '))\
  ||')' AS ColsSpec \
 FROM (\
- SELECT cpos, printf('\"%w\"',printf('%.*s%s', nlen-chop,name,suff)) AS cname \
+ SELECT cpos, printf('\"%w\"',printf('%!.*s%s', nlen-chop,name,suff)) AS cname \
  FROM ColNames ORDER BY cpos\
 )";
   static const char * const zRenamesDone =
     "SELECT group_concat("
-    " printf('\"%w\" to \"%w\"',name,printf('%.*s%s', nlen-chop, name, suff)),"
+    " printf('\"%w\" to \"%w\"',name,printf('%!.*s%s', nlen-chop, name, suff)),"
     " ','||x'0a')"
     "FROM ColNames WHERE suff<>'' OR chop!=0"
     ;
@@ -19436,14 +19443,19 @@ static int outputRedirs(char *azArg[], int nArg, ShellState *p,
   char *zFile = 0;
   int bTxtMode = 0;
   int i;
-  int bBOM = 0;
+  unsigned char zBOM[4];    /* Byte-order mark to using if --bom is present */
+
+  zBOM[0] = 0;
   if( p->bSafeMode ) return SHELL_FORBIDDEN_OP;
   for(i=1; i<nArg; i++){
     char *z = azArg[i];
     if( z[0]=='-' ){
       if( z[1]=='-' ) z++;
       if( strcmp(z,"-bom")==0 ){
-        bBOM = 1;
+        zBOM[0] = 0xef;
+        zBOM[1] = 0xbb;
+        zBOM[2] = 0xbf;
+        zBOM[3] = 0;
       }else if( bOnce!=2 && strcmp(z,"-x")==0 ){
         eMode = 'x';  /* spreadsheet */
       }else if( bOnce!=2 && strcmp(z,"-e")==0 ){
@@ -19511,7 +19523,7 @@ static int outputRedirs(char *azArg[], int nArg, ShellState *p,
       p->out = STD_OUT;
       rc = 1;
     }else{
-      if( bBOM ) fprintf(p->out,"\357\273\277");
+      if( zBOM[0] ) fwrite(zBOM, 1, 3, p->out);
       sqlite3_snprintf(sizeof(p->outfile), p->outfile, "%s", zFile);
     }
 #endif
@@ -19525,7 +19537,7 @@ static int outputRedirs(char *azArg[], int nArg, ShellState *p,
       p->out = STD_OUT;
       rc = 1;
     } else {
-      if( bBOM ) fprintf(p->out,"\357\273\277");
+      if( zBOM[0] ) fwrite(zBOM, 1, 3, p->out);
       sqlite3_snprintf(sizeof(p->outfile), p->outfile, "%s", zFile);
     }
   }
@@ -21284,6 +21296,11 @@ static int selecttraceCommand(char *azArg[], int nArg, ShellState *p, char **pzE
   sqlite3_test_control(SQLITE_TESTCTRL_TRACEFLAGS, 1, &x);
   return 0;
 }
+static int treetraceCommand(char *azArg[], int nArg, ShellState *p, char **pzErr){
+  unsigned int x = nArg>=2 ? (unsigned int)integerValue(azArg[1]) : 0xffffffff;
+  sqlite3_test_control(SQLITE_TESTCTRL_TRACEFLAGS, 1, &x);
+  return 0;
+}
 static int separatorCommand(char *azArg[], int nArg, ShellState *p, char **pzErr){
   if( nArg>=2 ){
     sqlite3_snprintf(sizeof(p->colSeparator), p->colSeparator,
@@ -22575,6 +22592,7 @@ static struct CommandInfo {
 #ifndef SQLITE_OMIT_TRACE
   { "trace", traceCommand, 0, 0, 0 },
 #endif
+  { "treetrace", treetraceCommand, 0, 1, 0 },
 #ifdef SQLITE_DEBUG
   { "unmodule", unmoduleCommand, 0, 2, 0 },
 #endif
