@@ -11,7 +11,7 @@ include(CMakePrintHelpers)
 
 #------------------------------------------------------------------------------
 # build options and optional modules:
-option(SQLITE_ENABLE_DBSTAT_VTAB    "enables dbstat virtual table"                    OFF)
+option(SQLITE_ENABLE_DBSTAT_VTAB    "enables dbstat virtual table"                    ON)
 option(SQLITE_ENABLE_FTS3           "enables full text searches version 3"            OFF)
 option(SQLITE_ENABLE_FTS4           "enables full text searches version 3 & 4"        ON)
 option(SQLITE_ENABLE_FTS5           "enables full text searches version 5"            ON)
@@ -43,7 +43,7 @@ option(SQLITE_ENABLE_COLUMN_METADATA         "enables the sqlite3_column_* colum
 option(SQLITE_ENABLE_COLUMN_USED_MASK        "enables identification of the table/index columns used for a cursor"     ON)
 option(SQLITE_ENABLE_COSTMULT                "enables the cost multiplier in the query compiler"     ON)
 option(SQLITE_ENABLE_CURSOR_HINTS            "enables providing hints to the cursor"     ON)
-option(SQLITE_ENABLE_HIDDEN_COLUMNS          "enables the usse of the __hidden__ table column"     OFF)
+option(SQLITE_ENABLE_HIDDEN_COLUMNS          "enables the use of the __hidden__ table column"     OFF)
 option(SQLITE_ENABLE_STMT_SCANSTATUS         "enables the Prepared Statement Scan Status feature"     ON)
 option(SQLITE_ENABLE_PREUPDATE_HOOK          "enables the pre-update hook: a callback function that is invoked prior to each [INSERT], [UPDATE], and [DELETE] operation on a database table"     ON)
 option(SQLITE_ENABLE_UNLOCK_NOTIFY           "enables the invocation of a user-defined callback when the connection currently holding the required lock relinquishes it"     ON)
