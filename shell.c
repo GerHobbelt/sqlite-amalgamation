@@ -14761,6 +14761,8 @@ static void exec_prepared_stmt_columnar(
   int bNextLine = 0;
   int bMultiLineRowExists = 0;
   int bw = p->cmOpts.bWordWrap;
+  const char *zEmpty = "";
+  const char *zShowNull = p->nullValue;
 
   rc = sqlite3_step(pStmt);
   if( rc!=SQLITE_ROW ) return;
@@ -14822,12 +14824,14 @@ static void exec_prepared_stmt_columnar(
       if( wx<0 ) wx = -wx;
       if( useNextLine ){
         uz = azNextLine[i];
+        if( uz==0 ) uz = (u8*)zEmpty;
       }else if( p->cmOpts.bQuote ){
         sqlite3_free(azQuoted[i]);
         azQuoted[i] = quoted_column(pStmt,i);
         uz = (const unsigned char*)azQuoted[i];
       }else{
         uz = (const unsigned char*)sqlite3_column_text(pStmt,i);
+        if( uz==0 ) uz = (u8*)zShowNull;
       }
       azData[nRow*nColumn + i]
         = translateForDisplayAndDup(uz, &azNextLine[i], wx, bw);
@@ -14841,7 +14845,7 @@ static void exec_prepared_stmt_columnar(
   nTotal = nColumn*(nRow+1);
   for(i=0; i<nTotal; i++){
     z = azData[i];
-    if( z==0 ) z = p->nullValue;
+    if( z==0 ) z = (char*)zEmpty;
     n = strlenChar(z);
     j = i%nColumn;
     if( n>p->actualWidth[j] ) p->actualWidth[j] = n;
@@ -14945,7 +14949,10 @@ columnar_end:
     utf8_printf(p->out, "Interrupt\n");
   }
   nData = (nRow+1)*nColumn;
-  for(i=0; i<nData; i++) free(azData[i]);
+  for(i=0; i<nData; i++){
+    z = azData[i];
+    if( z!=zEmpty && z!=zShowNull ) free(azData[i]);
+  }
   sqlite3_free(azData);
   sqlite3_free((void*)azNextLine);
   sqlite3_free(abRowDiv);
@@ -18678,7 +18685,7 @@ static RecoverTable *recoverOrphanTable(
 #endif /* !(SQLITE_OMIT_VIRTUALTABLE) && defined(SQLITE_ENABLE_DBPAGE_VTAB) */
 
 
-/* 
+/*
  * zAutoColumn(zCol, &db, ?) => Maybe init db, add column zCol to it.
  * zAutoColumn(0, &db, ?) => (db!=0) Form columns spec for CREATE TABLE,
  *   close db and set it to 0, and return the columns spec, to later
@@ -18760,6 +18767,13 @@ UPDATE ColNames AS t SET reps=\
 #ifdef SQLITE_ENABLE_MATH_FUNCTIONS
   static const char * const zColDigits = "\
 SELECT CAST(ceil(log(count(*)+0.5)) AS INT) FROM ColNames \
+";
+#else
+  /* Counting on SQLITE_MAX_COLUMN < 100,000 here. (32767 is the hard limit.) */
+  static const char * const zColDigits = "\
+SELECT CASE WHEN (nc < 10) THEN 1 WHEN (nc < 100) THEN 2 \
+ WHEN (nc < 1000) THEN 3 WHEN (nc < 10000) THEN 4 \
+ ELSE 5 FROM (SELECT count(*) AS nc FROM ColNames) \
 ";
 #endif
   static const char * const zRenameRank =
@@ -18846,11 +18860,7 @@ FROM (\
     /* Formulate the columns spec, close the DB, zero *pDb. */
     char *zColsSpec = 0;
     int hasDupes = db_int(*pDb, zHasDupes);
-#ifdef SQLITE_ENABLE_MATH_FUNCTIONS
     int nDigits = (hasDupes)? db_int(*pDb, zColDigits) : 0;
-#else
-# define nDigits 2
-#endif
     if( hasDupes ){
 #ifdef SHELL_COLUMN_RENAME_CLEAN
       rc = sqlite3_exec(*pDb, zDedoctor, 0, 0, 0);
@@ -19794,13 +19804,10 @@ static int importCommand(char *azArg[], int nArg, ShellState *p, char **pzErr){
   int nSkip = 0;              /* Initial lines to skip */
   int useOutputMode = 1;      /* Use output mode to determine separators */
   char *zCreate = 0;          /* CREATE TABLE statement text */
-  int rc = 0;
+  int rc = 1;
 
   if(p->bSafeMode) return SHELL_FORBIDDEN_OP;
   memset(&sCtx, 0, sizeof(sCtx));
-  if( 0==(sCtx.z = sqlite3_malloc64(120)) ){
-    shell_out_of_memory();
-  }
 
   if( p->mode==MODE_Ascii ){
     xRead = ascii_read_one_field;
@@ -19848,23 +19855,24 @@ static int importCommand(char *azArg[], int nArg, ShellState *p, char **pzErr){
   seenInterrupt = 0;
   open_db(p, 0);
   if( useOutputMode ){
-    const char *zYap = 0;
     /* If neither the --csv or --ascii options are specified, then set
     ** the column and row separator characters from the output mode. */
     nSep = strlen30(p->colSeparator);
     if( nSep==0 ){
-      zYap = "Error: non-null column separator required for import";
+      *pzErr = shellMPrintf(0, "Error: non-null column separator required for import\n");
+      return SHELL_INVALID_ARGS;
+      return 1;
     }
     if( nSep>1 ){
-      zYap = "Error: multi-character or multi-byte column separators"
-        " not allowed for import";
+      *pzErr = shellMPrintf(0, "Error: multi-character or multi-byte column separators"
+        " not allowed for import\n");
+      return SHELL_INVALID_ARGS;
+      return 1;
     }
     nSep = strlen30(p->rowSeparator);
     if( nSep==0 ){
-      zYap = "Error: non-null row separator required for import";
-    }
-    if( zYap!=0 ){
-      *pzErr = shellMPrintf(0,"%s\n", zYap);
+      *pzErr = shellMPrintf(0, "Error: non-null row separator required for import\n");
+      return SHELL_INVALID_ARGS;
       return 1;
     }
     if( nSep==2 && p->mode==MODE_Csv && strcmp(p->rowSeparator,SEP_CrLf)==0 ){
@@ -19899,10 +19907,11 @@ static int importCommand(char *azArg[], int nArg, ShellState *p, char **pzErr){
     sCtx.xCloser = fclose;
   }
   if( sCtx.in==0 ){
-        *pzErr = shellMPrintf(0,"Error: cannot open \"%s\"\n", zFile);
+    *pzErr = shellMPrintf(0,"Error: cannot open \"%s\"\n", zFile);
     import_cleanup(&sCtx);
     return 1;
   }
+  rc = 0;
   if( eVerbose>=2 || (eVerbose>=1 && useOutputMode) ){
     char zSep[2];
     zSep[1] = 0;
@@ -19913,6 +19922,11 @@ static int importCommand(char *azArg[], int nArg, ShellState *p, char **pzErr){
     zSep[0] = sCtx.cRowSep;
     output_c_string(p->out, zSep);
     utf8_printf(p->out, "\n");
+  }
+    sCtx.z = sqlite3_malloc64(120);
+    if( sCtx.z==0 ){
+      import_cleanup(&sCtx);
+      shell_out_of_memory();
   }
   /* Below, resources must be freed before exit. */
   while( (nSkip--)>0 ){
@@ -23791,6 +23805,9 @@ int SQLITE_CDECL SHELL_MAIN(int argc, const char **argv){
 int SQLITE_CDECL SHELL_MAIN(int argc, const wchar_t **wargv){
   char **argv;
 #endif
+#ifdef SQLITE_DEBUG
+  sqlite3_uint64 mem_main_enter = sqlite3_memory_used();
+#endif
   ShellState data;
   const char *zInitFile = 0;
   int i;
@@ -24364,5 +24381,11 @@ int SQLITE_CDECL SHELL_MAIN(int argc, const wchar_t **wargv){
     rc &= ~1;
   }
   memset(&data, 0, sizeof(data));
+#ifdef SQLITE_DEBUG
+  if( sqlite3_memory_used()>mem_main_enter ){
+    utf8_printf(stderr, "Memory leaked: %u bytes\n",
+                (unsigned int)(sqlite3_memory_used()-mem_main_enter));
+  }
+#endif
   return rc;
 }
