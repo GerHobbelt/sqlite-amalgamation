@@ -150,7 +150,7 @@
 //#include "../sqlite/ext/rtree/geopoly.c"
 //#include "../sqlite/ext/rtree/rtree.c"
 //#include "../sqlite/ext/rtree/test_rtreedoc.c"
-#include "../sqlite/ext/session/changeset.c"
+//#include "../sqlite/ext/session/changeset.c"
 //#include "../sqlite/ext/session/changesetfuzz.c"
 //#include "../sqlite/ext/session/session_speed_test.c"
 #include "../sqlite/ext/session/sqlite3changebatch.c"
