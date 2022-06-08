@@ -81,13 +81,19 @@
 # define NEVER(X)       (X)
 #endif
 
+/*
+* Note:
+*
+* #include's marked with `//--` have been reviewed as already included in the amalgamated sqlite sourcecode.
+*/
+
 #include "../sqlite/ext/fts5/fts5_aux.c"
 #include "../sqlite/ext/fts5/fts5_buffer.c"
 #include "../sqlite/ext/fts5/fts5_config.c"
 #include "../sqlite/ext/fts5/fts5_expr.c"
 #include "../sqlite/ext/fts5/fts5_hash.c"
 #include "../sqlite/ext/fts5/fts5_index.c"
-#include "../sqlite/ext/fts5/fts5_main.c"
+//--#include "../sqlite/ext/fts5/fts5_main.c"
 #include "../sqlite/ext/fts5/fts5_storage.c"
 #include "../sqlite/ext/fts5/fts5_tcl.c"
 #include "../sqlite/ext/fts5/fts5_test_mi.c"

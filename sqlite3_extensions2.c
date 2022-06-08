@@ -81,6 +81,12 @@
 # define NEVER(X)       (X)
 #endif
 
-#include "../sqlite/ext/expert/expert.c"
-#include "../sqlite/ext/expert/sqlite3expert.c"
+/*
+* Note:
+*
+* #include's marked with `//--` have been reviewed as already included in the amalgamated sqlite sourcecode.
+*/
+
+//--#include "../sqlite/ext/expert/expert.c"
+//--#include "../sqlite/ext/expert/sqlite3expert.c"
 #include "../sqlite/ext/expert/test_expert.c"

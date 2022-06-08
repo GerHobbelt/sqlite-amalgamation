@@ -81,7 +81,13 @@
 # define NEVER(X)       (X)
 #endif
 
-#include "../sqlite/ext/misc/shathree.c"
+/*
+* Note:
+*
+* #include's marked with `//--` have been reviewed as already included in the amalgamated sqlite sourcecode.
+*/
+
+//--#include "../sqlite/ext/misc/shathree.c"
 
 //#include "../sqlite/ext/session/changesetfuzz.c"
 #include "../sqlite/ext/session/session_speed_test.c"

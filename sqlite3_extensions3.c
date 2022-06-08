@@ -81,6 +81,12 @@
 # define NEVER(X)       (X)
 #endif
 
+/*
+* Note:
+*
+* #include's marked with `//--` have been reviewed as already included in the amalgamated sqlite sourcecode.
+*/
+
 #if 0
 #include "../sqlite/ext/lsm1/lsm-test/lsmtest1.c"
 #include "../sqlite/ext/lsm1/lsm-test/lsmtest2.c"

@@ -81,6 +81,12 @@
 # define NEVER(X)       (X)
 #endif
 
+/*
+* Note:
+*
+* #include's marked with `//--` have been reviewed as already included in the amalgamated sqlite sourcecode.
+*/
+
 #if defined(SQLITE_ENABLE_BROKEN_FTS1)
 #include "../sqlite/ext/fts1/fts1.c"
 #include "../sqlite/ext/fts1/fts1_hash.c"
@@ -98,7 +104,7 @@
 #include "../sqlite/ext/fts2/fts2_tokenizer.c"
 #include "../sqlite/ext/fts2/fts2_tokenizer1.c"
 #endif
-#include "../sqlite/ext/fts3/fts3.c"
+//--#include "../sqlite/ext/fts3/fts3.c"
 #include "../sqlite/ext/fts3/fts3_aux.c"
 #include "../sqlite/ext/fts3/fts3_expr.c"
 #include "../sqlite/ext/fts3/fts3_hash.c"

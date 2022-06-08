@@ -7061,6 +7061,7 @@ typedef UINT16_TYPE u16;           /* 2-byte unsigned integer */
 #if defined(SQLITE_COVERAGE_TEST) || defined(SQLITE_MUTATION_TEST)
 # define SQLITE_OMIT_AUXILIARY_SAFETY_CHECKS 1
 #endif
+#ifndef ALWAYS
 #if defined(SQLITE_OMIT_AUXILIARY_SAFETY_CHECKS)
 # define ALWAYS(X)      (1)
 # define NEVER(X)       (0)
@@ -7070,6 +7071,7 @@ typedef UINT16_TYPE u16;           /* 2-byte unsigned integer */
 #else
 # define ALWAYS(X)      (X)
 # define NEVER(X)       (X)
+#endif
 #endif
 
 #endif   /* SQLITE_AMALGAMATION */
@@ -11918,7 +11920,7 @@ static int dbdataLoadPage(
 /*
 ** Read a varint.  Put the value in *pVal and return the number of bytes.
 */
-static int dbdataGetVarint(const u8 *z, sqlite_uint64 *pVal){
+static int dbdataGetVarint(const u8 *z, sqlite3_int64 *pVal){
   sqlite3_int64 v = 0;
   int i;
   for(i=0; i<8; i++){
@@ -19309,7 +19311,7 @@ static int dbconfigCommand(char *azArg[], int nArg, ShellState *p, char **pzErr)
   }   
   return 0;
 }
-#if !defined(SQLITE_OMIT_VIRTUALTABLE) && defined(SQLITE_ENABLE_DBPAGE_VTAB)
+#if (!defined(SQLITE_OMIT_VIRTUALTABLE) && defined(SQLITE_ENABLE_DBPAGE_VTAB))
 static int dbinfoCommand(char *azArg[], int nArg, ShellState *p, char **pzErr){
   return shell_dbinfo_command(p, nArg, azArg);
 }
@@ -20861,7 +20863,7 @@ static int readCommand(char *azArg[], int nArg, ShellState *p, char **pzErr){
 ** to construct a new database containing all recovered data is output
 ** on stream pState->out.
 */
-#ifndef SQLITE_OMIT_VIRTUALTABLE
+#if (!defined(SQLITE_OMIT_VIRTUALTABLE) && defined(SQLITE_ENABLE_DBPAGE_VTAB))
 static int recoverCommand(char *azArg[], int nArg, ShellState *p, char **pzErr){
   open_db(p, 0);
   int rc = SQLITE_OK;
@@ -22087,7 +22089,7 @@ static int indicesCommand(char *azArg[], int nArg, ShellState *p, char **pzErr){
 /*****************
  * The .unmodule command
  */
-#ifdef SQLITE_DEBUG
+#if (defined(SQLITE_DEBUG) && !defined(SQLITE_OMIT_VIRTUALTABLE))
 static int unmoduleCommand(char *azArg[], int nArg, ShellState *p, char **pzErr){
   int ii;
   int lenOpt;
@@ -22605,7 +22607,7 @@ static struct CommandInfo {
   { "connection", connectionCommand, 0, 1, 4 },
   { "databases", databasesCommand, 2, 1, 0 },
   { "dbconfig", dbconfigCommand, 3, 1, 3 },
-#if !defined(SQLITE_OMIT_VIRTUALTABLE) && defined(SQLITE_ENABLE_DBPAGE_VTAB)
+#if (!defined(SQLITE_OMIT_VIRTUALTABLE) && defined(SQLITE_ENABLE_DBPAGE_VTAB))
   { "dbinfo", dbinfoCommand, 3, 1, 2 },
 #endif
   { "dump", dumpCommand, 0, 1, 2 },
@@ -22651,7 +22653,7 @@ static struct CommandInfo {
 #endif
   { "prompt", promptCommand, 0, 1, 3 },
   { "read", readCommand, 3, 2, 2 },
-#ifndef SQLITE_OMIT_VIRTUALTABLE
+#if (!defined(SQLITE_OMIT_VIRTUALTABLE) && defined(SQLITE_ENABLE_DBPAGE_VTAB))
   { "recover", recoverCommand, 0, 1, 7 },
 #endif
   { "restore", restoreCommand, 0, 2, 3 },
@@ -22687,7 +22689,7 @@ static struct CommandInfo {
   { "trace", traceCommand, 0, 0, 0 },
 #endif
   { "treetrace", treetraceCommand, 0, 1, 0 },
-#ifdef SQLITE_DEBUG
+#if (defined(SQLITE_DEBUG) && !defined(SQLITE_OMIT_VIRTUALTABLE))
   { "unmodule", unmoduleCommand, 0, 2, 0 },
 #endif
 #if SQLITE_USER_AUTHENTICATION
@@ -22770,8 +22772,10 @@ static const char *__azHelp[] = {
   "",
   ".dbconfig ?op? ?val?     List or change sqlite3_db_config() options\n",
   "",
+#if (!defined(SQLITE_OMIT_VIRTUALTABLE) && defined(SQLITE_ENABLE_DBPAGE_VTAB))
   ".dbinfo ?DB?             Show status information about the database\n",
   "",
+#endif
   ".dump ?OBJECTS?          Render database content as SQL\n",
   "   Options:\n"
   "     --data-only            Output only INSERT statements\n"
@@ -22938,7 +22942,7 @@ static const char *__azHelp[] = {
   ".read FILE               Read input from FILE\n",
   "   If FILE begins with \"|\", it is a command that generates the input.\n"
   "",
-#ifndef SQLITE_OMIT_VIRTUALTABLE
+#if (!defined(SQLITE_OMIT_VIRTUALTABLE) && defined(SQLITE_ENABLE_DBPAGE_VTAB))
   ".recover                 Recover as much data as possible from corrupt db.\n",
   "   --freelist-corrupt       Assume the freelist is corrupt\n"
   "   --recovery-db NAME       Store recovery metadata in database file NAME\n"
@@ -23050,7 +23054,7 @@ static const char *__azHelp[] = {
   "    --close                 Trace connection close (SQLITE_TRACE_CLOSE)\n"
   "",
 #endif
-#ifdef SQLITE_DEBUG
+#if (defined(SQLITE_DEBUG) && !defined(SQLITE_OMIT_VIRTUALTABLE))
   ".unmodule NAME ...       Unregister virtual table modules\n",
   "    --allexcept             Unregister everything except those named\n"
   "",
@@ -24477,7 +24481,7 @@ shell_bail:
 #ifndef SQLITE_SHELL_WASM_MODE
   /* In WASM mode we have to leave the db state in place so that
   ** client code can "push" SQL into it after this call returns. */
-  free(azCmd);
+  free((void *)azCmd);
   set_table_name(&data, 0);
   if( data.db ){
     session_close_all(&data, -1);

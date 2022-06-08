@@ -81,6 +81,12 @@
 # define NEVER(X)       (X)
 #endif
 
+/*
+* Note:
+*
+* #include's marked with `//--` have been reviewed as already included in the amalgamated sqlite sourcecode.
+*/
+
 #include "../sqlite/ext/misc/cksumvfs.c"
 
 #include "../sqlite/ext/misc/dbdata.c"
@@ -88,12 +94,27 @@
 #include "../sqlite/ext/misc/sha1.c"
 //#include "../sqlite/ext/misc/shathree.c"
 
-#include "../sqlite/ext/rtree/rtree.c"
-#include "../sqlite/ext/rtree/geopoly.c"
+//--#include "../sqlite/ext/rtree/rtree.c"
+//--#include "../sqlite/ext/rtree/geopoly.c"
 #if 0
 #include "../sqlite/ext/rtree/test_rtreedoc.c"
 #endif
 
+#undef main
+#undef usage
+#define usage rbu_usage
+
+#include "../sqlite/ext/rbu/rbu.c"
+
+#undef main
+#undef usage
+#define usage changesetfuzz_usage
+
 #include "../sqlite/ext/session/changesetfuzz.c"
+
+#undef main
+#undef usage
+#define usage changeset_usage
+
 #include "../sqlite/ext/session/changeset.c"
 //#include "../sqlite/ext/session/session_speed_test.c"
