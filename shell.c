@@ -16300,7 +16300,7 @@ static void open_db(ShellState *p, int openFlags){
       if( zDbFilename==0 || zDbFilename[0]==0 ){
         p->openMode = SHELL_OPEN_NORMAL;
       }else{
-        p->openMode = (u8)deduceDatabaseType(p->pAuxDb->zDbFilename, 
+        p->openMode = (u8)deduceDatabaseType(zDbFilename, 
                              (openFlags & OPEN_DB_ZIPFILE)!=0);
       }
     }
@@ -17003,7 +17003,7 @@ static void tryToCloneSchema(
                     zQuery);
     goto end_schema_xfer;
   }
-  while( sqlite3_step(pQuery)==SQLITE_ROW ){
+  while( (rc = sqlite3_step(pQuery))==SQLITE_ROW ){
     zName = sqlite3_column_text(pQuery, 0);
     zSql = sqlite3_column_text(pQuery, 1);
     if( zName==0 || zSql==0 ) continue;
@@ -18061,7 +18061,6 @@ static int arCheckEntries(ArCommand *pAr){
 ** The caller is responsible for eventually calling sqlite3_free() on
 ** any non-NULL (*pzWhere) value. Here, "match" means strict equality
 ** when pAr->bGlob is false and GLOB match when pAr->bGlob is true.
-
 */
 static void arWhereClause(
   int *pRc, 
@@ -19226,6 +19225,14 @@ static int binaryCommand(char *azArg[], int nArg, ShellState *p, char **pzErr){
   return 0;
 }
 
+/* The undocumented ".breakpoint" command causes a call
+** to the no-op routine named test_breakpoint().
+*/
+static int breakpointCommand(char *azArg[], int nArg, ShellState *p, char **pzErr){
+  test_breakpoint();
+  return 0;
+}
+
 static int cdCommand(char *azArg[], int nArg, ShellState *p, char **pzErr){
   int rc=0;
   if( p->bSafeMode ) return SHELL_FORBIDDEN_OP;
@@ -19241,14 +19248,6 @@ static int cdCommand(char *azArg[], int nArg, ShellState *p, char **pzErr){
     rc = 1;
   }
   return rc;
-}
-
-/* The undocumented ".breakpoint" command causes a call
-** to the no-op routine named test_breakpoint().
-*/
-static int breakpointCommand(char *azArg[], int nArg, ShellState *p, char **pzErr){
-  test_breakpoint();
-  return 0;
 }
 
 /*****************
@@ -19596,8 +19595,8 @@ static int expertCommand(char *azArg[], int nArg, ShellState *p, char **pzErr){
 }
 #endif
 static int explainCommand(char *azArg[], int nArg, ShellState *p, char **pzErr){
-  /* The ".explain" command is automatic now.  It is largely
-  ** pointless, retained purely for backwards compatibility */
+  /* The ".explain" command is automatic now.  It is largely pointless.  It
+  ** retained purely for backwards compatibility */
   int val = 1;
   if( nArg>1 ){
     if( strcmp(azArg[1],"auto")==0 ){
@@ -20051,19 +20050,16 @@ static int importCommand(char *azArg[], int nArg, ShellState *p, char **pzErr){
     if( nSep==0 ){
       *pzErr = shellMPrintf(0, "Error: non-null column separator required for import\n");
       return SHELL_INVALID_ARGS;
-      return 1;
     }
     if( nSep>1 ){
       *pzErr = shellMPrintf(0, "Error: multi-character or multi-byte column separators"
         " not allowed for import\n");
       return SHELL_INVALID_ARGS;
-      return 1;
     }
     nSep = strlen30(p->rowSeparator);
     if( nSep==0 ){
       *pzErr = shellMPrintf(0, "Error: non-null row separator required for import\n");
       return SHELL_INVALID_ARGS;
-      return 1;
     }
     if( nSep==2 && p->mode==MODE_Csv && strcmp(p->rowSeparator,SEP_CrLf)==0 ){
       /* When importing CSV (only), if the row separator is set to the
@@ -20714,7 +20710,7 @@ static int openCommand(char *azArg[], int nArg, ShellState *p, char **pzErr){
         && zFN
         && strcmp(zFN,":memory:")!=0
         ){
-      *pzErr = shellMPrintf(0,"cannot open database files in safe mode");
+      *pzErr = shellMPrintf(0,"cannot open disk-based database files in safe mode");
       return SHELL_FORBIDDEN_OP;
     }
 #else
@@ -20752,7 +20748,8 @@ static int nonceCommand(char *azArg[], int nArg, ShellState *p, char **pzErr){
   }
   /* Suspend safe mode for 1 meta-command after this. */
   p->bSafeModeFuture = 2;
-  return 0;
+  return 0;  /* Return immediately to bypass the safe mode reset
+              ** at the end of this procedure */
 }
 
 static int nullvalueCommand(char *azArg[], int nArg, ShellState *p, char **pzErr){
@@ -20859,7 +20856,7 @@ static int parameterCommand(char *azArg[], int nArg, ShellState *p, char **pzErr
   if( nArg==3 && strcmp(azArg[1],"unset")==0 ){
     char *zSql = sqlite3_mprintf(
         "DELETE FROM temp.sqlite_parameters WHERE key=%Q", azArg[2]);
-    if( zSql==0 ) shell_out_of_memory();
+    shell_check_oom(zSql);
     sqlite3_exec(p->db, zSql, 0, 0, 0);
     sqlite3_free(zSql);
   }else
@@ -21459,8 +21456,8 @@ static int schemaCommand(char *azArg[], int nArg, ShellState *p, char **pzErr){
       char *zQarg = sqlite3_mprintf("%Q", zName);
       int bGlob;
       shell_check_oom(zQarg);
-      bGlob = strchr(zName, '*') != 0 || strchr(zName, '?') != 0
-        || strchr(zName, '[') != 0;
+      bGlob = strchr(zName, '*') != 0 || strchr(zName, '?') != 0 ||
+              strchr(zName, '[') != 0;
       if( strchr(zName, '.') ){
         appendText(&sSelect, "lower(printf('%s.%s',sname,tbl_name))", 0);
       }else{
@@ -22458,6 +22455,13 @@ static int testctrlCommand(char *azArg[], int nArg, ShellState *p, char **pzErr)
       break;
     }
 #endif
+    case SQLITE_TESTCTRL_SORTER_MMAP:
+      if( nArg==3 ){
+        int opt = (unsigned int)integerValue(azArg[2]);
+        rc2 = sqlite3_test_control(testctrl, p->db, opt);
+        isOk = 3;
+      }
+      break;
     }
   }
   if( isOk==0 && iCtrl>=0 ){
@@ -22823,6 +22827,8 @@ static unsigned numCommands
   = sizeof(command_table)/sizeof(struct CommandInfo) - 1;
 
 
+
+
 /*
 ** Text of help messages.
 **
@@ -22873,6 +22879,8 @@ static const char *__azHelp[] = {
   ".bail on|off             Stop after hitting an error.  Default OFF\n",
   "",
   ".binary on|off           Turn binary output on or off.  Default OFF\n",
+  "",
+  ".breakpoint              (Undocumented Command) call to the no-op routine named test_breakpoint()\n",
   "",
   ".cd DIRECTORY            Change the working directory to DIRECTORY\n",
   "",
@@ -22957,6 +22965,8 @@ static const char *__azHelp[] = {
   "                           If TABLE is specified, only show indexes for\n"
   "                           tables matching TABLE using the LIKE operator.\n"
   "",
+  ".indices ?TABLE?         Alias of the .indexes command\n",
+  "",
 #ifdef SQLITE_ENABLE_IOTRACE
   ".iotrace FILE            Enable I/O diagnostic logging to FILE\n",
   "",
@@ -23009,8 +23019,8 @@ static const char *__azHelp[] = {
   ".once ?OPTIONS? ?FILE?   Output for the next SQL command only to FILE\n",
   "   If FILE begins with '|' then open it as a command to be piped into.\n"
   "   Options:\n"
-  "     --bom                 Prefix output with a UTF8 byte-order mark\n"
-  "     -e                    Send output to the system text editor\n"
+  "     --bom    Prefix output with a UTF8 byte-order mark\n"
+  "     -e       Send output to the system text editor\n"
   "     -x       Send output as CSV to a spreadsheet (same as \".excel\")\n"
   "",
   ".open ?OPTIONS? ?FILE?   Close existing database and reopen FILE\n",
@@ -23029,8 +23039,8 @@ static const char *__azHelp[] = {
   ".output ?FILE?           Send output to FILE or stdout if FILE is omitted\n",
   "   If FILE begins with '|' then open it as a command to be piped into.\n"
   "   Options:\n"
-  "     --bom                 Prefix output with a UTF8 byte-order mark\n"
-  "     -e                    Send output to the system text editor\n"
+  "     --bom    Prefix output with a UTF8 byte-order mark\n"
+  "     -e       Send output to the system text editor\n"
   "     -x       Send output as CSV to a spreadsheet (same as \".excel\")\n"
   "",
   ".parameter CMD ...       Manage SQL parameter bindings\n",
@@ -23055,8 +23065,8 @@ static const char *__azHelp[] = {
   "",
   ".quit                    Exit this program\n",
   "",
-  ".read FILE               Read input from FILE\n",
-  "   If FILE begins with \"|\", it is a command that generates the input.\n"
+  ".read FILE               Read input from FILE or command output\n",
+  "    If FILE begins with \"|\", it is a command that generates the input.\n"
   "",
 #if (!defined(SQLITE_OMIT_VIRTUALTABLE) && defined(SQLITE_ENABLE_DBPAGE_VTAB))
   ".recover                 Recover as much data as possible from corrupt db.\n",
@@ -23086,10 +23096,16 @@ static const char *__azHelp[] = {
   "    A near-dummy command for use as a template (to vanish soon)\n"
   "",
 #endif
+  ".selecttrace ?NUM?       (Undocumented Command)\n",
+  "",
   ".selftest ?OPTIONS?      Run tests defined in the SELFTEST table\n",
   "    Options:\n"
   "       --init               Create a new SELFTEST table\n"
   "       -v                   Verbose output\n"
+  "",
+  ".selftest_boolean ...    (Undocumented Command) Undocumented command for internal testing\n",
+  "",
+  ".selftest_integer ...    (Undocumented Command) Undocumented command for internal testing\n",
   "",
   ".separator COL ?ROW?     Change the column and row separators\n",
   "",
@@ -23170,9 +23186,20 @@ static const char *__azHelp[] = {
   "    --close                 Trace connection close (SQLITE_TRACE_CLOSE)\n"
   "",
 #endif
+  ".treetrace ?NUM?         (Undocumented Command)\n",
+  "",
 #if (defined(SQLITE_DEBUG) && !defined(SQLITE_OMIT_VIRTUALTABLE))
   ".unmodule NAME ...       Unregister virtual table modules\n",
   "    --allexcept             Unregister everything except those named\n"
+  "",
+#endif
+#if SQLITE_USER_AUTHENTICATION
+  ".user SUBCOMMAND ...     Undocumented Command)\n",
+  "   Subcommands are:\n"
+  "     login USER PASSWORD\n"
+  "     delete USER\n"
+  "     add USER PASSWORD ISADMIN\n"
+  "     edit USER PASSWORD ISADMIN\n"
   "",
 #endif
   ".version                 Show a variety of version info\n",
@@ -23182,6 +23209,8 @@ static const char *__azHelp[] = {
   ".vfslist                 List all available VFSes\n",
   "",
   ".vfsname ?AUX?           Print the name of the VFS stack\n",
+  "",
+  ".wheretrace ?NUM?        (Undocumented Command)\n",
   "",
   ".width NUM1 NUM2 ...     Set minimum column widths for columnar output\n",
   "     Negative values right-justify\n"
@@ -23307,7 +23336,7 @@ static int do_meta_command(char *zLine, ShellState *p){
    * Subject to change without notice.
    * These are not dispatched via lookup because the command word varies.
    */
-  if( c=='s' && n>=10 && strncmp(azArg[0], "selftest-", 9)==0 ){
+  if( c=='s' && n>=10 && strncmp(azArg[0], "selftest_", 9)==0 ){
     if( strncmp(azArg[0]+9, "boolean", n-9)==0 ){
       int i, v;
       for(i=1; i<nArg; i++){
@@ -24009,7 +24038,6 @@ static const char *cmdline_option_value(int argc, const char **argv, int i){
   return argv[i];
 }
 
-
 #ifndef SQLITE_SHELL_IS_UTF8
 #  if (defined(_WIN32) || defined(WIN32)) \
    && (defined(_MSC_VER) || (defined(UNICODE) && defined(__GNUC__)))
@@ -24134,6 +24162,15 @@ int SQLITE_CDECL SHELL_MAIN(int argc, const wchar_t **wargv){
 
   assert( argc>=1 && argv && argv[0] );
   Argv0 = argv[0];
+
+  /* Register the control-C (SIGINT) handler.
+  ** Make sure we have a valid signal handler early, before anything
+  ** is done that might take long. */
+#ifdef SIGINT
+  signal(SIGINT, interrupt_handler);
+#elif (defined(_WIN32) || defined(WIN32)) && !defined(_WIN32_WCE)
+  SetConsoleCtrlHandler(ConsoleCtrlHandler, TRUE);
+#endif
 
 #ifdef SQLITE_SHELL_DBNAME_PROC
   {
@@ -24299,15 +24336,7 @@ int SQLITE_CDECL SHELL_MAIN(int argc, const wchar_t **wargv){
   sqlite3_initialize();
 #endif
 
-  /* Register the control-C (SIGINT) handler.
-  ** Make sure we have a valid signal handler early, before anything
-  ** is done that might take long. */
   pGlobalDbLock = sqlite3_mutex_alloc(SQLITE_MUTEX_FAST);
-#ifdef SIGINT
-  signal(SIGINT, interrupt_handler);
-#elif (defined(_WIN32) || defined(WIN32)) && !defined(_WIN32_WCE)
-  SetConsoleCtrlHandler(ConsoleCtrlHandler, TRUE);
-#endif
 
   if( zVfs ){
     sqlite3_vfs *pVfs = sqlite3_vfs_find(zVfs);
