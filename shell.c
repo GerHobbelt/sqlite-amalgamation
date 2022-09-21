@@ -12738,10 +12738,10 @@ int sqlite3_recover_config(sqlite3_recover*, int op, void *pArg);
 **   clear, then new rowids are assigned to all recovered rows. The
 **   default value is 1 (set).
 */
-#define SQLITE_RECOVER_TESTDB           789
-#define SQLITE_RECOVER_LOST_AND_FOUND   1
-#define SQLITE_RECOVER_FREELIST_CORRUPT 2
-#define SQLITE_RECOVER_ROWIDS           3
+#define SQLITE_RECOVER_TESTDB           1
+#define SQLITE_RECOVER_LOST_AND_FOUND   2
+#define SQLITE_RECOVER_FREELIST_CORRUPT 3
+#define SQLITE_RECOVER_ROWIDS           4
 
 /* 
 ** Run the recovery operation. This function does not return until the 
