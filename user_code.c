@@ -36,7 +36,7 @@
 
 
 
-#ifdef SQLITE_ENABLE_SQLLOG
+#if defined(SQLITE_ENABLE_SQLLOG)
 extern void sqlite3_init_sqllog(void);
 void sqlite3_init_sqllog(void) {
 	/* nothing */
