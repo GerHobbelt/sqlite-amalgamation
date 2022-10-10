@@ -49,3 +49,6 @@
 # OSX shit
 .DS_Store
 .directory
+
+# CMake build cruft
+/b/

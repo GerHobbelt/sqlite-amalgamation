@@ -1,12 +1,12 @@
 cmake_minimum_required(VERSION 3.8)
 project(SQLite3
-    VERSION   3.31.1
+    VERSION   3.40.0
     LANGUAGES C
     )
 
 include(GNUInstallDirs)
 
-# Helpers for debugging CmakeeFiles
+# Helpers for debugging CMakeFiles
 include(CMakePrintHelpers)
 
 #------------------------------------------------------------------------------
@@ -72,7 +72,7 @@ endif()
 #------------------------------------------------------------------------------
 
 # SQLite3 as static library:
-add_library(${PROJECT_NAME} STATIC sqlite3.c sqlite3.h ${CMAKE_BINARY_DIR}/sqlite3_config.h)
+add_library(${PROJECT_NAME} STATIC sqlite3.c sqlite3.h ${CMAKE_BINARY_DIR}/sqlite_features_config.h sqlite_cfg.h)
 set_target_properties(${PROJECT_NAME} PROPERTIES
     OUTPUT_NAME   sqlite3
     PUBLIC_HEADER sqlite3.h
@@ -80,6 +80,7 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
     )
 target_include_directories(${PROJECT_NAME} PUBLIC $<INSTALL_INTERFACE:include>)
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_BINARY_DIR})
+target_include_directories(${PROJECT_NAME} PRIVATE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR})
 target_compile_definitions(${PROJECT_NAME} PUBLIC # inject user's options
     $<BUILD_INTERFACE:
 		_HAVE_SQLITE_CONFIG_H
@@ -102,7 +103,7 @@ elseif(WIN32 AND ${CMAKE_SIZEOF_VOID_P} LESS 8) # this is a 32bit windows
 endif()
 
 #------------------------------------------------------------------------------
-configure_file(sqlite3_config.h.in ${CMAKE_BINARY_DIR}/sqlite3_config.h)
+configure_file(sqlite_features_config.h.in ${CMAKE_BINARY_DIR}/sqlite_features_config.h)
 
 install(TARGETS ${PROJECT_NAME} EXPORT ${PROJECT_NAME}Config
     ARCHIVE       DESTINATION ${CMAKE_INSTALL_LIBDIR}
@@ -114,16 +115,17 @@ install(EXPORT  ${PROJECT_NAME}Config
     DESTINATION cmake
     )
 install(FILES
-    ${CMAKE_BINARY_DIR}/sqlite3_config.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+    ${CMAKE_BINARY_DIR}/sqlite_features_config.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
     )
 
 #------------------------------------------------------------------------------
 # SQLite3 shell application:
 option(BUILD_SHELL "build SQLite3 shell application" ON)
 if(BUILD_SHELL)
-    add_executable(shell_app shell.c user_code.c sqlite3.h ${CMAKE_BINARY_DIR}/sqlite3_config.h)
+    add_executable(shell_app shell.c user_code.c sqlite3.h ${CMAKE_BINARY_DIR}/sqlite_features_config.h sqlite_cfg.h)
     set_target_properties(shell_app PROPERTIES OUTPUT_NAME sqlite3)
-	target_include_directories(shell_app PRIVATE ${CMAKE_BINARY_DIR})
+    target_include_directories(shell_app PRIVATE ${CMAKE_BINARY_DIR})
+    target_include_directories(shell_app PRIVATE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR})
     target_link_libraries(shell_app PRIVATE ${PROJECT_NAME})
     if(UNIX)
         if(CMAKE_BUILD_TYPE STREQUAL Release)
