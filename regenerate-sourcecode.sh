@@ -8,7 +8,7 @@ echo "REPODIR=$REPODIR"
 
 cd ../sqlite/
 make clean
-# make sqlite3_config.h
+# make sqlite3_cfg.h
 make amalgamation
 
 echo "Copy generated files to amalgamation repo in $REPODIR..."
