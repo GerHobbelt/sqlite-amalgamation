@@ -18950,6 +18950,8 @@ static int dump_callback(void *pArg, int nArg, char **azArg, char **azNotUsed){
   zTable = azArg[0];
   zType = azArg[1];
   zSql = azArg[2];
+  if( zTable==0 ) return 0;
+  if( zType==0 ) return 0;
   dataOnly = (p->shellFlgs & SHFLG_DumpDataOnly)!=0;
   noSys    = (p->shellFlgs & SHFLG_DumpNoSys)!=0;
 
@@ -23614,7 +23616,7 @@ static int modeCommand(char *azArg[], int nArg, ShellState *p, char **pzErr){
        cmOpts.bQuote = 0;
     }else if( zMode==0 ){
       zMode = z;
-      /* Apply defaults for qbox pseudo-mods. If that
+        /* Apply defaults for qbox pseudo-mode.  If that
        * overwrites already-set values, user was informed of this.
        */
       if( cli_strcmp(z, "qbox")==0 ){
@@ -26072,7 +26074,7 @@ static const char *__azHelp[] = {
   "     line        One value per line\n"
   "     list        Values delimited by \"|\"\n"
   "     markdown    Markdown table format\n"
-  "     qbox        Shorthand for \"box --width 60 --quote\"\n"
+  "     qbox        Shorthand for \"box --wrap 60 --quote\"\n"
   "     quote       Escape answers as for SQL\n"
   "     table       ASCII-art table\n"
   "     tabs        Tab-separated values\n"
@@ -27860,9 +27862,8 @@ int fiddle_export_db( int (*xCallback)(unsigned const char *zOut, int n) ){
 /*
 ** Trivial exportable function for emscripten. It processes zSql as if
 ** it were input to the sqlite3 shell and redirects all output to the
-** wasm binding. If fiddle_main() has not been called by the time this
-** is called, this function calls it with a conservative set of
-** flags.
+** wasm binding. fiddle_main() must have been called before this
+** is called, or results are undefined.
 */
 void fiddle_exec(const char * zSql){
   if(zSql && *zSql){
