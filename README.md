@@ -89,7 +89,7 @@ these **recommended** compile options are also passed to the compiler by
 | SQLITE_OMIT_SHARED_CACHE           |
 | SQLITE_USE_ALLOCA                  |
 
-all compile-time options will go into `sqlite3_config.h`, you may
+all compile-time options will go into `sqlite_cfg.h`, you may
 use this file to check these options when building your application.
 
 the SQLite3 shell (executable) is disabled by default, to build it just

@@ -23,7 +23,7 @@
 ** autoconf-based build
 */
 #if defined(_HAVE_SQLITE_CONFIG_H) && !defined(SQLITECONFIG_H)
-#include "sqlite3_config.h"
+#include "sqlite_cfg.h"
 #define SQLITECONFIG_H 1
 #endif
 
@@ -89,7 +89,7 @@
 
 #include "../sqlite/ext/misc/cksumvfs.c"
 
-#include "../sqlite/ext/misc/dbdata.c"
+#include "../sqlite/ext/recover/dbdata.c"
 
 #include "../sqlite/ext/misc/sha1.c"
 //#include "../sqlite/ext/misc/shathree.c"
