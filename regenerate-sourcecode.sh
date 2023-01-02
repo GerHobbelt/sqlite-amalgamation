@@ -25,4 +25,4 @@ cp -n sqlite_cfg.h                 $REPODIR
 echo "Copy generated files to amalgamation repo in $REPODIR..."
 cp sqlite3.c $REPODIR/sqlite3.c
 cp sqlite3.h $REPODIR/sqlite3.h
-cp shell.c sqlite3.1 sqlite3_analyzer.c sqlite3_checker.c sqlite3ext.* sqlite3rc.* sqlite3session.* src/obj_interfaces.h include/*.h $REPODIR
+cp shell.c sqlite3.1 sqlite3_analyzer.c sqlite3_checker.c sqlite3ext.* sqlite3rc.* sqlite3session.* src/obj_interfaces.h include/*.h monolithic_examples.h $REPODIR
