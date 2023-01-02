@@ -16,6 +16,7 @@ MONOLITHIC_CMD_TABLE_START()
 { "getlock", { .fa = sqlite_getlock_main } },
 { "index_usage", { .fa = sqlite_index_usage_main } },
 { "kvtest", { .fa = sqlite_kvtest_main } },
+{ "lemon", {.fa = sqlite_lemon_main } },
 { "libvers", { .fa = sqlite_libvers_main } },
 { "logest", { .fa = sqlite_logest_main } },
 { "sqlite", { .fa = sqlite_main } },
