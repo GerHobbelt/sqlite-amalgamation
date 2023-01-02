@@ -4283,7 +4283,7 @@ static unsigned re_next_char(ReInput *p){
       c = (c&0x0f)<<12 | ((p->z[p->i]&0x3f)<<6) | (p->z[p->i+1]&0x3f);
       p->i += 2;
       if( c<=0x7ff || (c>=0xd800 && c<=0xdfff) ) c = 0xfffd;
-    }else if( (c&0xf8)==0xf0 && p->i+3<p->mx && (p->z[p->i]&0xc0)==0x80
+    }else if( (c&0xf8)==0xf0 && p->i+2<p->mx && (p->z[p->i]&0xc0)==0x80
            && (p->z[p->i+1]&0xc0)==0x80 && (p->z[p->i+2]&0xc0)==0x80 ){
       c = (c&0x07)<<18 | ((p->z[p->i]&0x3f)<<12) | ((p->z[p->i+1]&0x3f)<<6)
                        | (p->z[p->i+2]&0x3f);
@@ -4810,15 +4810,15 @@ static const char *re_compile(ReCompiled **ppRe, const char *zIn, int noCase){
   ** one or more matching characters, enter those matching characters into
   ** zInit[].  The re_match() routine can then search ahead in the input 
   ** string looking for the initial match without having to run the whole
-  ** regex engine over the string.  Do not worry able trying to match
+  ** regex engine over the string.  Do not worry about trying to match
   ** unicode characters beyond plane 0 - those are very rare and this is
   ** just an optimization. */
   if( pRe->aOp[0]==RE_OP_ANYSTAR && !noCase ){
     for(j=0, i=1; j<(int)sizeof(pRe->zInit)-2 && pRe->aOp[i]==RE_OP_MATCH; i++){
       unsigned x = pRe->aArg[i];
-      if( x<=127 ){
+      if( x<=0x7f ){
         pRe->zInit[j++] = (unsigned char)x;
-      }else if( x<=0xfff ){
+      }else if( x<=0x7ff ){
         pRe->zInit[j++] = (unsigned char)(0xc0 | (x>>6));
         pRe->zInit[j++] = 0x80 | (x&0x3f);
       }else if( x<=0xffff ){
@@ -5230,6 +5230,8 @@ LPWSTR utf8_to_utf16(const char *z){
 }
 #endif
 
+extern LPWSTR sqlite3_win32_utf8_to_unicode(const char*);
+
 /*
 ** This function attempts to normalize the time values found in the stat()
 ** buffer to UTC.  This is necessary on Win32, where the runtime library
@@ -5242,7 +5244,6 @@ static void statTimesToUtc(
   HANDLE hFindFile;
   WIN32_FIND_DATAW fd;
   LPWSTR zUnicodeName;
-  extern LPWSTR sqlite3_win32_utf8_to_unicode(const char*);
   zUnicodeName = sqlite3_win32_utf8_to_unicode(zPath);
   if( zUnicodeName ){
     memset(&fd, 0, sizeof(WIN32_FIND_DATAW));
@@ -26964,6 +26965,39 @@ static char *find_home_dir(int clearFlag){
 }
 
 /*
+** On non-Windows platforms, look for $XDG_CONFIG_HOME.
+** If ${XDG_CONFIG_HOME}/sqlite3/sqliterc is found, return
+** the path to it, else return 0. The result is cached for
+** subsequent calls.
+*/
+static const char *find_xdg_config(void){
+#if defined(_WIN32) || defined(WIN32) || defined(_WIN32_WCE) \
+     || defined(__RTP__) || defined(_WRS_KERNEL)
+  return 0;
+#else
+  static int alreadyTried = 0;
+  static char *zConfig = 0;
+  const char *zXdgHome;
+
+  if( alreadyTried!=0 ){
+    return zConfig;
+  }
+  alreadyTried = 1;
+  zXdgHome = getenv("XDG_CONFIG_HOME");
+  if( zXdgHome==0 ){
+    return 0;
+  }
+  zConfig = sqlite3_mprintf("%s/sqlite3/sqliterc", zXdgHome);
+  shell_check_oom(zConfig);
+  if( access(zConfig,0)!=0 ){
+    sqlite3_free(zConfig);
+    zConfig = 0;
+  }
+  return zConfig;
+#endif
+}
+
+/*
 ** Run a single query.
 ** This is a convenience function, used in several places, all of
 ** demand a shell exit upon failure, which leads to return 2.
@@ -26987,10 +27021,11 @@ static int run_single_query(ShellState *p, const char *zSql){
   return rc;
 }
 
-
 /*
 ** Read input from the file given by sqliterc_override.  Or if that
-** parameter is NULL, take input from ~/.sqliterc
+** parameter is NULL, take input from the first of find_xdg_config()
+** or ~/.sqliterc which is found.
+**
 ** The return is similar to process_input() (0 success, 1 error, x abort)
 */
 static int process_sqliterc(
@@ -27004,7 +27039,10 @@ static int process_sqliterc(
   int savedLineno = p->lineno;
   int rc;
 
-  if (sqliterc == NULL) {
+  if( sqliterc == NULL ){
+    sqliterc = find_xdg_config();
+  }
+  if( sqliterc == NULL ){
     home_dir = find_home_dir(0);
     if( home_dir==0 ){
       raw_printf(STD_ERR, "-- warning: cannot find home directory;"

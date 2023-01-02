@@ -146,9 +146,9 @@ extern "C" {
 ** [sqlite3_libversion_number()], [sqlite3_sourceid()],
 ** [sqlite_version()] and [sqlite_source_id()].
 */
-#define SQLITE_VERSION        "3.40.0"
-#define SQLITE_VERSION_NUMBER 3040000
-#define SQLITE_SOURCE_ID      "2022-11-17 01:24:06 a119a9e2ade4eac5feb1aa885c15b83e725f87386351de99d3abb4965621alt1"
+#define SQLITE_VERSION        "3.41.0"
+#define SQLITE_VERSION_NUMBER 3041000
+#define SQLITE_SOURCE_ID      "2022-11-21 16:00:26 5f564bf7de7ce3ad7bedb5f06b3086ceaec55da768a60d74059fa4fba432alt1"
 
 /*
 ** CAPI3REF: Run-Time Library Version Numbers
@@ -5542,16 +5542,6 @@ SQLITE_API SQLITE_DEPRECATED int sqlite3_memory_alarm(void(*)(void*,sqlite3_int6
 ** then the conversion is performed.  Otherwise no conversion occurs.
 ** The [SQLITE_INTEGER | datatype] after conversion is returned.)^
 **
-** ^(The sqlite3_value_encoding(X) interface returns one of [SQLITE_UTF8],
-** [SQLITE_UTF16BE], or [SQLITE_UTF16LE] according to the current encoding
-** of the value X, assuming that X has type TEXT.)^  If sqlite3_value_type(X)
-** returns something other than SQLITE_TEXT, then the return value from
-** sqlite3_value_encoding(X) is meaningless.  ^Calls to
-** sqlite3_value_text(X), sqlite3_value_text16(X), sqlite3_value_text16be(X),
-** sqlite3_value_text16le(X), sqlite3_value_bytes(X), or
-** sqlite3_value_bytes16(X) might change the encoding of the value X and
-** thus change the return from subsequent calls to sqlite3_value_encoding(X).
-**
 ** ^Within the [xUpdate] method of a [virtual table], the
 ** sqlite3_value_nochange(X) interface returns true if and only if
 ** the column corresponding to X is unchanged by the UPDATE operation
@@ -5616,6 +5606,27 @@ SQLITE_API int sqlite3_value_type(sqlite3_value*);
 SQLITE_API int sqlite3_value_numeric_type(sqlite3_value*);
 SQLITE_API int sqlite3_value_nochange(sqlite3_value*);
 SQLITE_API int sqlite3_value_frombind(sqlite3_value*);
+
+/*
+** CAPI3REF: Report the internal text encoding state of an sqlite3_value object
+** METHOD: sqlite3_value
+**
+** ^(The sqlite3_value_encoding(X) interface returns one of [SQLITE_UTF8],
+** [SQLITE_UTF16BE], or [SQLITE_UTF16LE] according to the current text encoding
+** of the value X, assuming that X has type TEXT.)^  If sqlite3_value_type(X)
+** returns something other than SQLITE_TEXT, then the return value from
+** sqlite3_value_encoding(X) is meaningless.  ^Calls to
+** [sqlite3_value_text(X)], [sqlite3_value_text16(X)], [sqlite3_value_text16be(X)],
+** [sqlite3_value_text16le(X)], [sqlite3_value_bytes(X)], or
+** [sqlite3_value_bytes16(X)] might change the encoding of the value X and
+** thus change the return from subsequent calls to sqlite3_value_encoding(X).
+**
+** This routine is intended for used by applications that test and validate
+** the SQLite implementation.  This routine is inquiring about the opaque
+** internal state of an [sqlite3_value] object.  Ordinary applications should
+** not need to know what the internal state of an sqlite3_value object is and
+** hence should not need to use this interface.
+*/
 SQLITE_API int sqlite3_value_encoding(sqlite3_value*);
 
 /*
@@ -10618,13 +10629,13 @@ struct sqlite3_rtree_query_info {
 #if !defined(__SQLITESESSION_H_) && defined(SQLITE_ENABLE_SESSION)
 #define __SQLITESESSION_H_ 1
 
+
 /*
 ** Make sure we can call this stuff from C++.
 */
 #ifdef __cplusplus
 extern "C" {
 #endif
-
 
 /*
 ** CAPI3REF: Session Object Handle
