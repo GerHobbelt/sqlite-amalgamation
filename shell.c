@@ -1358,6 +1358,7 @@ static void shellAddSchemaName(
 */
 #define SQLITE_EXTENSION_INIT1
 #define SQLITE_EXTENSION_INIT2(X) (void)(X)
+#define SQLITE_EXTENSION_INIT3
 
 #if defined(_WIN32) && defined(_MSC_VER)
 /****************** Begin <projectDir>/src/test_windirent.h ******************/
@@ -1894,7 +1895,13 @@ int sqlite3MemTraceDeactivate(void){
 /* #include "sqlite3_config.h" */
 
 /* #include "sqlite3ext.h" */
+
+#if !defined(BUILD_MONOLITHIC)
 SQLITE_EXTENSION_INIT1
+#else
+SQLITE_EXTENSION_INIT3
+#endif
+
 #include <assert.h>
 #include <string.h>
 #include <stdarg.h>
@@ -2624,7 +2631,13 @@ int sqlite3_shathree_init(
 /* #include "sqlite3_config.h" */
 
 /* #include "sqlite3ext.h" */
+
+#if !defined(BUILD_MONOLITHIC)
 SQLITE_EXTENSION_INIT1
+#else
+SQLITE_EXTENSION_INIT3
+#endif
+
 #include <assert.h>
 #include <string.h>
 #include <ctype.h>
@@ -2708,7 +2721,13 @@ int sqlite3_uint_init(
 /* #include "sqlite3_config.h" */
 
 /* #include "sqlite3ext.h" */
+
+#if !defined(BUILD_MONOLITHIC)
 SQLITE_EXTENSION_INIT1
+#else
+SQLITE_EXTENSION_INIT3
+#endif
+
 #include <assert.h>
 #include <string.h>
 #include <ctype.h>
@@ -3422,7 +3441,13 @@ int sqlite3_decimal_init(
 /* #include "sqlite3_config.h" */
 
 /* #include "sqlite3ext.h" */
+
+#if !defined(BUILD_MONOLITHIC)
 SQLITE_EXTENSION_INIT1
+#else
+SQLITE_EXTENSION_INIT3
+#endif
+
 #include <assert.h>
 #include <string.h>
 
@@ -3703,7 +3728,13 @@ int sqlite3_ieee_init(
 /* #include "sqlite3_config.h" */
 
 /* #include "sqlite3ext.h" */
+
+#if !defined(BUILD_MONOLITHIC)
 SQLITE_EXTENSION_INIT1
+#else
+SQLITE_EXTENSION_INIT3
+#endif
+
 #include <assert.h>
 #include <string.h>
 
@@ -4157,7 +4188,12 @@ int sqlite3_series_init(
 #include <string.h>
 #include <stdlib.h>
 /* #include "sqlite3ext.h" */
+
+#if !defined(BUILD_MONOLITHIC)
 SQLITE_EXTENSION_INIT1
+#else
+SQLITE_EXTENSION_INIT3
+#endif
 
 /*
 ** The following #defines change the names of some functions implemented in
@@ -5063,7 +5099,13 @@ int sqlite3_regexp_init(
 /* #include "sqlite3_config.h" */
 
 /* #include "sqlite3ext.h" */
+
+#if !defined(BUILD_MONOLITHIC)
 SQLITE_EXTENSION_INIT1
+#else
+SQLITE_EXTENSION_INIT3
+#endif
+
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
@@ -6054,7 +6096,13 @@ int sqlite3_fileio_init(
 /* #include "sqlite3_config.h" */
 
 /* #include "sqlite3ext.h" */
+
+#if !defined(BUILD_MONOLITHIC)
 SQLITE_EXTENSION_INIT1
+#else
+SQLITE_EXTENSION_INIT3
+#endif
+
 #include <assert.h>
 #include <string.h>
 #include <ctype.h>
@@ -6573,7 +6621,13 @@ int sqlite3_completion_init(
 /* #include "sqlite3_config.h" */
 
 /* #include "sqlite3ext.h" */
+
+#if !defined(BUILD_MONOLITHIC)
 SQLITE_EXTENSION_INIT1
+#else
+SQLITE_EXTENSION_INIT3
+#endif
+
 #include <string.h>
 #include <assert.h>
 
@@ -7230,7 +7284,13 @@ int sqlite3_appendvfs_init(
 /* #include "sqlite3_config.h" */
 
 /* #include "sqlite3ext.h" */
+
+#if !defined(BUILD_MONOLITHIC)
 SQLITE_EXTENSION_INIT1
+#else
+SQLITE_EXTENSION_INIT3
+#endif
+
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
@@ -9440,7 +9500,13 @@ int sqlite3_zipfile_init(
 /* #include "sqlite3_config.h" */
 
 /* #include "sqlite3ext.h" */
+
+#if !defined(BUILD_MONOLITHIC)
 SQLITE_EXTENSION_INIT1
+#else
+SQLITE_EXTENSION_INIT3
+#endif
+
 #include <zlib-ng.h>
 #include <assert.h>
 
@@ -11854,13 +11920,20 @@ void sqlite3_expert_destroy(sqlite3expert *p){
 /* #include "sqlite3_config.h" */
 
 #if !defined(SQLITEINT_H) 
+
 /* #include "sqlite3ext.h" */
 
 /* typedef unsigned char u8; */
 /* typedef unsigned int u32; */
 
 #endif
+
+#if !defined(BUILD_MONOLITHIC)
 SQLITE_EXTENSION_INIT1
+#else
+SQLITE_EXTENSION_INIT3
+#endif
+
 #include <string.h>
 #include <assert.h>
 

@@ -29,11 +29,23 @@
 */
 #include "sqlite3_config.h"
 
+#ifdef SQLITE_CORE
+#undef SQLITE_CORE
+#endif
+
+#include "sqlite3.h"
+#include "sqlite3ext.h"
+
+SQLITE_EXTENSION_INIT1
 
 
 #if defined(SQLITE_ENABLE_SQLLOG)
 extern void sqlite3_init_sqllog(void);
+
+#if 0
 void sqlite3_init_sqllog(void) {
 	/* nothing */
 }
+#endif
+
 #endif
