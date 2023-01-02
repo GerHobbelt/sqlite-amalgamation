@@ -22,10 +22,7 @@
 ** Include the configuration header output by 'configure' if we're using the
 ** autoconf-based build
 */
-#if defined(_HAVE_SQLITE_CONFIG_H) && !defined(SQLITECONFIG_H)
-#include "sqlite_cfg.h"
-#define SQLITECONFIG_H 1
-#endif
+#include "sqlite3_config.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -148,18 +145,23 @@
 #include "../sqlite/ext/misc/wholenumber.c"
 //--#include "../sqlite/ext/misc/zipfile.c"
 #include "../sqlite/ext/misc/zorder.c"
+
 //#include "../sqlite/ext/rbu/rbu.c"
 //--#include "../sqlite/ext/rbu/sqlite3rbu.c"
 #include "../sqlite/ext/rbu/test_rbu.c"
+
 #include "../sqlite/ext/repair/checkfreelist.c"
 #include "../sqlite/ext/repair/checkindex.c"
+
 //#include "../sqlite/ext/rtree/geopoly.c"
 //#include "../sqlite/ext/rtree/rtree.c"
 //#include "../sqlite/ext/rtree/test_rtreedoc.c"
+// 
 //#include "../sqlite/ext/session/changeset.c"
 //#include "../sqlite/ext/session/changesetfuzz.c"
 //#include "../sqlite/ext/session/session_speed_test.c"
 #include "../sqlite/ext/session/sqlite3changebatch.c"
 //--#include "../sqlite/ext/session/sqlite3session.c"
 #include "../sqlite/ext/session/test_session.c"
+
 #include "../sqlite/ext/userauth/userauth.c"

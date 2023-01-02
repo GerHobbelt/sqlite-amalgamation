@@ -35,8 +35,6 @@
 /* This needs to come before any includes for MSVC compiler */
 #define _CRT_SECURE_NO_WARNINGS
 #endif
-typedef unsigned int u32;
-typedef unsigned short int u16;
 
 /*
 ** Optionally #include a user-defined header, whereby compilation options
@@ -91,14 +89,13 @@ typedef unsigned short int u16;
 #if defined(BUILD_MONOLITHIC)
 #define SQLITE_SHELL_IS_UTF8 1
 
-#if defined(_HAVE_SQLITE_CONFIG_H) && !defined(SQLITECONFIG_H)
-#include "sqlite_cfg.h"
-#define SQLITECONFIG_H 1
-#endif
+#include "sqlite3_config.h"
 
 #include "mupdf/mutool.h"
 
 #include "monolithic_examples.h"
+#else
+#error b0rkb0rkb0rk
 #endif   // BUILD_MONOLITHIC
 
 /*
@@ -858,7 +855,6 @@ static void utf8_width_print(FILE *pOut, int w, const char *zUtf){
   int i;
   int n;
   int aw = w<0 ? -w : w;
-  if( zUtf==0 ) zUtf = "";
   for(i=n=0; zUtf[i]; i++){
     if( (zUtf[i]&0xc0)!=0x80 ){
       n++;
@@ -1774,6 +1770,8 @@ INT closedir(
 ** This extension is used to implement the --memtrace option of the
 ** command-line shell.
 */
+/* #include "sqlite3.h" */
+
 #include <assert.h>
 #include <string.h>
 #include <stdio.h>
@@ -1890,10 +1888,7 @@ int sqlite3MemTraceDeactivate(void){
 ** 384, or 512, to determine SHA3 hash variant that is computed.
 */
 
-#if defined(_HAVE_SQLITE_CONFIG_H) && !defined(SQLITECONFIG_H)
-/* #include "sqlite_cfg.h" */
-#define SQLITECONFIG_H 1
-#endif
+/* #include "sqlite3_config.h" */
 
 /* #include "sqlite3ext.h" */
 SQLITE_EXTENSION_INIT1
@@ -2623,10 +2618,7 @@ int sqlite3_shathree_init(
 **         64-bit machine integer.
 */
 
-#if defined(_HAVE_SQLITE_CONFIG_H) && !defined(SQLITECONFIG_H)
-/* #include "sqlite_cfg.h" */
-#define SQLITECONFIG_H 1
-#endif
+/* #include "sqlite3_config.h" */
 
 /* #include "sqlite3ext.h" */
 SQLITE_EXTENSION_INIT1
@@ -2710,10 +2702,7 @@ int sqlite3_uint_init(
 ** The focus here is on simplicity and correctness, not performance.
 */
 
-#if defined(_HAVE_SQLITE_CONFIG_H) && !defined(SQLITECONFIG_H)
-/* #include "sqlite_cfg.h" */
-#define SQLITECONFIG_H 1
-#endif
+/* #include "sqlite3_config.h" */
 
 /* #include "sqlite3ext.h" */
 SQLITE_EXTENSION_INIT1
@@ -3427,10 +3416,7 @@ int sqlite3_decimal_init(
 **
 */
 
-#if defined(_HAVE_SQLITE_CONFIG_H) && !defined(SQLITECONFIG_H)
-/* #include "sqlite_cfg.h" */
-#define SQLITECONFIG_H 1
-#endif
+/* #include "sqlite3_config.h" */
 
 /* #include "sqlite3ext.h" */
 SQLITE_EXTENSION_INIT1
@@ -3711,10 +3697,7 @@ int sqlite3_ieee_init(
 ** series are well-defined.
 */
 
-#if defined(_HAVE_SQLITE_CONFIG_H) && !defined(SQLITECONFIG_H)
-/* #include "sqlite_cfg.h" */
-#define SQLITECONFIG_H 1
-#endif
+/* #include "sqlite3_config.h" */
 
 /* #include "sqlite3ext.h" */
 SQLITE_EXTENSION_INIT1
@@ -4166,10 +4149,7 @@ int sqlite3_series_init(
 ** this expansion.
 */
 
-#if defined(_HAVE_SQLITE_CONFIG_H) && !defined(SQLITECONFIG_H)
-/* #include "sqlite_cfg.h" */
-#define SQLITECONFIG_H 1
-#endif
+/* #include "sqlite3_config.h" */
 
 #include <string.h>
 #include <stdlib.h>
@@ -5077,10 +5057,7 @@ int sqlite3_regexp_init(
 **   DLL form of this extension for WIN32. See its use below for details.
 */
 
-#if defined(_HAVE_SQLITE_CONFIG_H) && !defined(SQLITECONFIG_H)
-/* #include "sqlite_cfg.h" */
-#define SQLITECONFIG_H 1
-#endif
+/* #include "sqlite3_config.h" */
 
 /* #include "sqlite3ext.h" */
 SQLITE_EXTENSION_INIT1
@@ -6070,10 +6047,7 @@ int sqlite3_fileio_init(
 **
 */
 
-#if defined(_HAVE_SQLITE_CONFIG_H) && !defined(SQLITECONFIG_H)
-/* #include "sqlite_cfg.h" */
-#define SQLITECONFIG_H 1
-#endif
+/* #include "sqlite3_config.h" */
 
 /* #include "sqlite3ext.h" */
 SQLITE_EXTENSION_INIT1
@@ -6592,10 +6566,7 @@ int sqlite3_completion_init(
 ** this shim is a pass-through into the default underlying VFS. (rule 3)
 **/
 
-#if defined(_HAVE_SQLITE_CONFIG_H) && !defined(SQLITECONFIG_H)
-/* #include "sqlite_cfg.h" */
-#define SQLITECONFIG_H 1
-#endif
+/* #include "sqlite3_config.h" */
 
 /* #include "sqlite3ext.h" */
 SQLITE_EXTENSION_INIT1
@@ -7252,10 +7223,7 @@ int sqlite3_appendvfs_init(
 **    *  Only the "inflate/deflate" (zlib) compression method is supported
 */
 
-#if defined(_HAVE_SQLITE_CONFIG_H) && !defined(SQLITECONFIG_H)
-/* #include "sqlite_cfg.h" */
-#define SQLITECONFIG_H 1
-#endif
+/* #include "sqlite3_config.h" */
 
 /* #include "sqlite3ext.h" */
 SQLITE_EXTENSION_INIT1
@@ -9465,10 +9433,7 @@ int sqlite3_zipfile_init(
 ** sqlar support.
 */
 
-#if defined(_HAVE_SQLITE_CONFIG_H) && !defined(SQLITECONFIG_H)
-/* #include "sqlite_cfg.h" */
-#define SQLITECONFIG_H 1
-#endif
+/* #include "sqlite3_config.h" */
 
 /* #include "sqlite3ext.h" */
 SQLITE_EXTENSION_INIT1
@@ -11802,11 +11767,6 @@ void sqlite3_expert_destroy(sqlite3expert *p){
 /**************** End <projectDir>/ext/expert/sqlite3expert.c ****************/
 
 #if !defined(SQLITE_OMIT_VIRTUALTABLE) && defined(SQLITE_ENABLE_DBPAGE_VTAB)
-#define SQLITE_SHELL_HAVE_RECOVER 1
-#else
-#define SQLITE_SHELL_HAVE_RECOVER 0
-#endif
-#if SQLITE_SHELL_HAVE_RECOVER
 /****************** Begin <projectDir>/ext/recover/dbdata.c ******************/
 /*
 ** 2019-04-17
@@ -11882,23 +11842,18 @@ void sqlite3_expert_destroy(sqlite3expert *p){
 **   child page in the database.
 */
 
-#if defined(_HAVE_SQLITE_CONFIG_H) && !defined(SQLITECONFIG_H)
-/* #include "sqlite_cfg.h" */
-#define SQLITECONFIG_H 1
-#endif
+/* #include "sqlite3_config.h" */
 
 #if !defined(SQLITEINT_H) 
 /* #include "sqlite3ext.h" */
 
 /* typedef unsigned char u8; */
-/* typedef unsigned int u32; */
+typedef unsigned int u32;
 
 #endif
 SQLITE_EXTENSION_INIT1
 #include <string.h>
 #include <assert.h>
-
-#ifndef SQLITE_OMIT_VIRTUALTABLE
 
 #define DBDATA_PADDING_BYTES 100 
 
@@ -11921,8 +11876,8 @@ struct DbdataCursor {
 
   /* Only for the sqlite_dbdata table */
   u8 *pRec;                       /* Buffer containing current record */
-  sqlite3_int64 nRec;             /* Size of pRec[] in bytes */
-  sqlite3_int64 nHdr;             /* Size of header in bytes */
+  int nRec;                       /* Size of pRec[] in bytes */
+  int nHdr;                       /* Size of header in bytes */
   int iField;                     /* Current field number */
   u8 *pHdrPtr;
   u8 *pPtr;
@@ -12151,27 +12106,25 @@ static int dbdataLoadPage(
 
   *ppPage = 0;
   *pnPage = 0;
-  if( pgno>0 ){
-    sqlite3_bind_int64(pStmt, 2, pgno);
-    if( SQLITE_ROW==sqlite3_step(pStmt) ){
-      int nCopy = sqlite3_column_bytes(pStmt, 0);
-      if( nCopy>0 ){
-        u8 *pPage;
-        pPage = (u8*)sqlite3_malloc64(nCopy + DBDATA_PADDING_BYTES);
-        if( pPage==0 ){
-          rc = SQLITE_NOMEM;
-        }else{
-          const u8 *pCopy = sqlite3_column_blob(pStmt, 0);
-          memcpy(pPage, pCopy, nCopy);
-          memset(&pPage[nCopy], 0, DBDATA_PADDING_BYTES);
-        }
-        *ppPage = pPage;
-        *pnPage = nCopy;
+  sqlite3_bind_int64(pStmt, 2, pgno);
+  if( SQLITE_ROW==sqlite3_step(pStmt) ){
+    int nCopy = sqlite3_column_bytes(pStmt, 0);
+    if( nCopy>0 ){
+      u8 *pPage;
+      pPage = (u8*)sqlite3_malloc64(nCopy + DBDATA_PADDING_BYTES);
+      if( pPage==0 ){
+        rc = SQLITE_NOMEM;
+      }else{
+        const u8 *pCopy = sqlite3_column_blob(pStmt, 0);
+        memcpy(pPage, pCopy, nCopy);
+        memset(&pPage[nCopy], 0, DBDATA_PADDING_BYTES);
       }
+      *ppPage = pPage;
+      *pnPage = nCopy;
     }
-    rc2 = sqlite3_reset(pStmt);
-    if( rc==SQLITE_OK ) rc = rc2;
   }
+  rc2 = sqlite3_reset(pStmt);
+  if( rc==SQLITE_OK ) rc = rc2;
 
   return rc;
 }
@@ -12180,28 +12133,15 @@ static int dbdataLoadPage(
 ** Read a varint.  Put the value in *pVal and return the number of bytes.
 */
 static int dbdataGetVarint(const u8 *z, sqlite3_int64 *pVal){
-  sqlite3_uint64 u = 0;
+  sqlite3_int64 v = 0;
   int i;
   for(i=0; i<8; i++){
-    u = (u<<7) + (z[i]&0x7f);
-    if( (z[i]&0x80)==0 ){ *pVal = (sqlite3_int64)u; return i+1; }
+    v = (v<<7) + (z[i]&0x7f);
+    if( (z[i]&0x80)==0 ){ *pVal = v; return i+1; }
   }
-  u = (u<<8) + (z[i]&0xff);
-  *pVal = (sqlite3_int64)u;
+  v = (v<<8) + (z[i]&0xff);
+  *pVal = v;
   return 9;
-}
-
-/*
-** Like dbdataGetVarint(), but set the output to 0 if it is less than 0
-** or greater than 0xFFFFFFFF. This can be used for all varints in an
-** SQLite database except for key values in intkey tables.
-*/
-static int dbdataGetVarintU32(const u8 *z, sqlite3_int64 *pVal){
-  sqlite3_int64 val;
-  int nRet = dbdataGetVarint(z, &val);
-  if( val<0 || val>0xFFFFFFFF ) val = 0;
-  *pVal = val;
-  return nRet;
 }
 
 /*
@@ -12243,7 +12183,7 @@ static void dbdataValue(
   u32 enc,
   int eType, 
   u8 *pData,
-  sqlite3_int64 nData
+  int nData
 ){
   if( eType>=0 && dbdataValueBytes(eType)<=nData ){
     switch( eType ){
@@ -12286,14 +12226,12 @@ static void dbdataValue(
         int n = ((eType-12) / 2);
         if( eType % 2 ){
           switch( enc ){
-#ifndef SQLITE_OMIT_UTF16
             case SQLITE_UTF16BE:
               sqlite3_result_text16be(pCtx, (void*)pData, n, SQLITE_TRANSIENT);
               break;
             case SQLITE_UTF16LE:
               sqlite3_result_text16le(pCtx, (void*)pData, n, SQLITE_TRANSIENT);
               break;
-#endif
             default:
               sqlite3_result_text(pCtx, (char*)pData, n, SQLITE_TRANSIENT);
               break;
@@ -12389,7 +12327,7 @@ static int dbdataNext(sqlite3_vtab_cursor *pCursor){
           if( bNextPage || iOff>pCsr->nPage ){
             bNextPage = 1;
           }else{
-            iOff += dbdataGetVarintU32(&pCsr->aPage[iOff], &nPayload);
+            iOff += dbdataGetVarint(&pCsr->aPage[iOff], &nPayload);
           }
     
           /* If this is a leaf intkey cell, load the rowid */
@@ -12456,8 +12394,7 @@ static int dbdataNext(sqlite3_vtab_cursor *pCursor){
               }
             }
     
-            iHdr = dbdataGetVarintU32(pCsr->pRec, &nHdr);
-            if( nHdr>nPayload ) nHdr = 0;
+            iHdr = dbdataGetVarint(pCsr->pRec, &nHdr);
             pCsr->nHdr = nHdr;
             pCsr->pHdrPtr = &pCsr->pRec[iHdr];
             pCsr->pPtr = &pCsr->pRec[pCsr->nHdr];
@@ -12471,7 +12408,7 @@ static int dbdataNext(sqlite3_vtab_cursor *pCursor){
           if( pCsr->pHdrPtr>&pCsr->pRec[pCsr->nRec] ){
             bNextPage = 1;
           }else{
-            pCsr->pHdrPtr += dbdataGetVarintU32(pCsr->pHdrPtr, &iType);
+            pCsr->pHdrPtr += dbdataGetVarint(pCsr->pHdrPtr, &iType);
             pCsr->pPtr += dbdataValueBytes(iType);
           }
         }
@@ -12515,9 +12452,9 @@ static int dbdataEof(sqlite3_vtab_cursor *pCursor){
 ** otherwise.
 */
 static int dbdataIsFunction(const char *zSchema){
-  size_t n = strlen(zSchema);
+  int n = strlen(zSchema);
   if( n>2 && zSchema[n-2]=='(' && zSchema[n-1]==')' ){
-    return (int)n-2;
+    return n-2;
   }
   return 0;
 }
@@ -12588,7 +12525,6 @@ static int dbdataFilter(
   assert( pCsr->iPgno==1 );
   if( idxNum & 0x01 ){
     zSchema = (const char*)sqlite3_value_text(argv[0]);
-    if( zSchema==0 ) zSchema = "";
   }
   if( idxNum & 0x02 ){
     pCsr->iPgno = sqlite3_value_int(argv[(idxNum & 0x01)]);
@@ -12679,9 +12615,9 @@ static int dbdataColumn(
       case DBDATA_COLUMN_VALUE: {
         if( pCsr->iField<0 ){
           sqlite3_result_int64(ctx, pCsr->iIntkey);
-        }else if( &pCsr->pRec[pCsr->nRec] >= pCsr->pPtr ){
+        }else{
           sqlite3_int64 iType;
-          dbdataGetVarintU32(pCsr->pHdrPtr, &iType);
+          dbdataGetVarint(pCsr->pHdrPtr, &iType);
           dbdataValue(
               ctx, pCsr->enc, iType, pCsr->pPtr, 
               &pCsr->pRec[pCsr->nRec] - pCsr->pPtr
@@ -12753,8 +12689,6 @@ int sqlite3_dbdata_init(
   SQLITE_EXTENSION_INIT2(pApi);
   return sqlite3DbdataRegister(db);
 }
-
-#endif /* ifndef SQLITE_OMIT_VIRTUALTABLE */
 /******************* End <projectDir>/ext/recover/dbdata.c *******************/
 /************** Begin <projectDir>/ext/recover/sqlite3recover.h **************/
 /*
@@ -12816,25 +12750,7 @@ extern "C" {
 #endif
 
 /*
-** An instance of the sqlite3_recover object represents a recovery
-** operation in progress.
-**
-** Constructors:
-**
-**    sqlite3_recover_init()
-**    sqlite3_recover_init_sql()
-**
-** Destructor:
-**
-**    sqlite3_recover_finish()
-**
-** Methods:
-**
-**    sqlite3_recover_config()
-**    sqlite3_recover_errcode()
-**    sqlite3_recover_errmsg()
-**    sqlite3_recover_run()
-**    sqlite3_recover_step()
+** Opaque handle type.
 */
 typedef struct sqlite3_recover sqlite3_recover;
 
@@ -13009,6 +12925,7 @@ int sqlite3_recover_finish(sqlite3_recover*);
 #endif
 
 #endif /* ifndef _SQLITE_RECOVER_H */
+
 /*************** End <projectDir>/ext/recover/sqlite3recover.h ***************/
 /************** Begin <projectDir>/ext/recover/sqlite3recover.c **************/
 /*
@@ -13029,8 +12946,6 @@ int sqlite3_recover_finish(sqlite3_recover*);
 /* #include "sqlite3recover.h" */
 #include <assert.h>
 #include <string.h>
-
-#ifndef SQLITE_OMIT_VIRTUALTABLE
 
 /*
 ** Declaration for public API function in file dbdata.c. This may be called
@@ -13295,39 +13210,16 @@ static RecoverGlobal recover_g;
 */
 #define RECOVER_ROWID_DEFAULT 1
 
-/*
-** Mutex handling:
-**
-**    recoverEnterMutex()       -   Enter the recovery mutex
-**    recoverLeaveMutex()       -   Leave the recovery mutex
-**    recoverAssertMutexHeld()  -   Assert that the recovery mutex is held
-*/
-#if defined(SQLITE_THREADSAFE) && SQLITE_THREADSAFE==0
-# define recoverEnterMutex()
-# define recoverLeaveMutex()
-#else
-static void recoverEnterMutex(void){
-  sqlite3_mutex_enter(sqlite3_mutex_alloc(RECOVER_MUTEX_ID));
-}
-static void recoverLeaveMutex(void){
-  sqlite3_mutex_leave(sqlite3_mutex_alloc(RECOVER_MUTEX_ID));
-}
-#endif
-#if SQLITE_THREADSAFE+0>=1 && defined(SQLITE_DEBUG)
-static void recoverAssertMutexHeld(void){
-  assert( sqlite3_mutex_held(sqlite3_mutex_alloc(RECOVER_MUTEX_ID)) );
-}
-#else
-# define recoverAssertMutexHeld()
-#endif
-
 
 /*
 ** Like strlen(). But handles NULL pointer arguments.
 */
 static int recoverStrlen(const char *zStr){
-  if( zStr==0 ) return 0;
-  return (int)(strlen(zStr)&0x7fffffff);
+  int nRet = 0;
+  if( zStr ){
+    while( zStr[nRet] ) nRet++;
+  }
+  return nRet;
 }
 
 /*
@@ -13512,7 +13404,7 @@ static sqlite3_stmt *recoverPreparePrintf(
 */
 static sqlite3_stmt *recoverReset(sqlite3_recover *p, sqlite3_stmt *pStmt){
   int rc = sqlite3_reset(pStmt);
-  if( rc!=SQLITE_OK && rc!=SQLITE_CONSTRAINT && p->errCode==SQLITE_OK ){
+  if( rc!=SQLITE_OK && p->errCode==SQLITE_OK ){
     recoverDbError(p, sqlite3_db_handle(pStmt));
   }
   return pStmt;
@@ -13715,11 +13607,9 @@ static void recoverGetPage(
     if( pStmt ){
       sqlite3_bind_int64(pStmt, 1, pgno);
       if( SQLITE_ROW==sqlite3_step(pStmt) ){
-        const u8 *aPg;
-        int nPg;
         assert( p->errCode==SQLITE_OK );
-        aPg = sqlite3_column_blob(pStmt, 0);
-        nPg = sqlite3_column_bytes(pStmt, 0);
+        const u8 *aPg = sqlite3_column_blob(pStmt, 0);
+        int nPg = sqlite3_column_bytes(pStmt, 0);
         if( pgno==1 && nPg==p->pgsz && 0==memcmp(p->pPage1Cache, aPg, nPg) ){
           aPg = p->pPage1Disk;
         }
@@ -15032,10 +14922,7 @@ static void recoverFinalCleanup(sqlite3_recover *p){
   p->pGetPage = 0;
 
   {
-#ifndef NDEBUG
-    int res = 
-#endif
-       sqlite3_close(p->dbOut);
+    int res = sqlite3_close(p->dbOut);
     assert( res==SQLITE_OK );
   }
   p->dbOut = 0;
@@ -15062,14 +14949,14 @@ static u32 recoverGetU32(const u8 *a){
 ** and return the number of bytes consumed.
 */
 static int recoverGetVarint(const u8 *a, i64 *pVal){
-  sqlite3_uint64 u = 0;
+  sqlite3_int64 v = 0;
   int i;
   for(i=0; i<8; i++){
-    u = (u<<7) + (a[i]&0x7f);
-    if( (a[i]&0x80)==0 ){ *pVal = (sqlite3_int64)u; return i+1; }
+    v = (v<<7) + (a[i]&0x7f);
+    if( (a[i]&0x80)==0 ){ *pVal = v; return i+1; }
   }
-  u = (u<<8) + (a[i]&0xff);
-  *pVal = (sqlite3_int64)u;
+  v = (v<<8) + (a[i]&0xff);
+  *pVal = v;
   return 9;
 }
 
@@ -15188,8 +15075,6 @@ static int recoverVfsShmMap(sqlite3_file*, int, int, int, void volatile**);
 static int recoverVfsShmLock(sqlite3_file*, int offset, int n, int flags);
 static void recoverVfsShmBarrier(sqlite3_file*);
 static int recoverVfsShmUnmap(sqlite3_file*, int deleteFlag);
-static int recoverVfsFetch(sqlite3_file*, sqlite3_int64, int, void**);
-static int recoverVfsUnfetch(sqlite3_file *pFd, sqlite3_int64 iOff, void *p);
 
 static sqlite3_io_methods recover_methods = {
   2, /* iVersion */
@@ -15209,8 +15094,7 @@ static sqlite3_io_methods recover_methods = {
   recoverVfsShmLock,
   recoverVfsShmBarrier,
   recoverVfsShmUnmap,
-  recoverVfsFetch,
-  recoverVfsUnfetch
+  0, 0
 };
 
 static int recoverVfsClose(sqlite3_file *pFd){
@@ -15291,7 +15175,7 @@ static int recoverVfsDetectPagesize(
         }
       }
     }
-    if( pgsz>(u32)p->detected_pgsz ){
+    if( pgsz>p->detected_pgsz ){
       p->detected_pgsz = pgsz;
       p->nReserve = nReserve;
     }
@@ -15368,6 +15252,7 @@ static int recoverVfsRead(sqlite3_file *pFd, void *aBuf, int nByte, i64 iOff){
       rc = pFd->pMethods->xFileSize(pFd, &dbFileSize);
 
       if( rc==SQLITE_OK && p->detected_pgsz==0 ){
+        u32 pgsz2 = 0;
         rc = recoverVfsDetectPagesize(p, pFd, nReserve, dbFileSize);
       }
       if( p->detected_pgsz ){
@@ -15476,7 +15361,7 @@ static int recoverVfsCheckReservedLock(sqlite3_file *pFd, int *pResOut){
 }
 static int recoverVfsFileControl(sqlite3_file *pFd, int op, void *pArg){
   RECOVER_VFS_WRAPPER (
-    (pFd->pMethods ?  pFd->pMethods->xFileControl(pFd, op, pArg) : SQLITE_NOTFOUND)
+      pFd->pMethods->xFileControl(pFd, op, pArg)
   );
 }
 static int recoverVfsSectorSize(sqlite3_file *pFd){
@@ -15516,19 +15401,6 @@ static int recoverVfsShmUnmap(sqlite3_file *pFd, int deleteFlag){
   );
 }
 
-static int recoverVfsFetch(
-  sqlite3_file *pFd, 
-  sqlite3_int64 iOff, 
-  int iAmt, 
-  void **pp
-){
-  *pp = 0;
-  return SQLITE_OK;
-}
-static int recoverVfsUnfetch(sqlite3_file *pFd, sqlite3_int64 iOff, void *p){
-  return SQLITE_OK;
-}
-
 /*
 ** Install the VFS wrapper around the file-descriptor open on the input
 ** database for recover handle p. Mutex RECOVER_MUTEX_ID must be held
@@ -15537,14 +15409,11 @@ static int recoverVfsUnfetch(sqlite3_file *pFd, sqlite3_int64 iOff, void *p){
 static void recoverInstallWrapper(sqlite3_recover *p){
   sqlite3_file *pFd = 0;
   assert( recover_g.pMethods==0 );
-  recoverAssertMutexHeld();
+  assert( sqlite3_mutex_held( sqlite3_mutex_alloc(RECOVER_MUTEX_ID) ) );
   sqlite3_file_control(p->dbIn, p->zDb, SQLITE_FCNTL_FILE_POINTER, (void*)&pFd);
-  assert( pFd==0 || pFd->pMethods!=&recover_methods );
-  if( pFd && pFd->pMethods ){
-    int iVersion = 1 + (pFd->pMethods->iVersion>1 && pFd->pMethods->xShmMap!=0);
+  if( pFd ){
     recover_g.pMethods = pFd->pMethods;
     recover_g.p = p;
-    recover_methods.iVersion = iVersion;
     pFd->pMethods = &recover_methods;
   }
 }
@@ -15555,10 +15424,11 @@ static void recoverInstallWrapper(sqlite3_recover *p){
 ** held when this function is called.
 */
 static void recoverUninstallWrapper(sqlite3_recover *p){
-  sqlite3_file *pFd = 0;
-  recoverAssertMutexHeld();
-  sqlite3_file_control(p->dbIn, p->zDb,SQLITE_FCNTL_FILE_POINTER,(void*)&pFd);
-  if( pFd && pFd->pMethods ){
+  assert( sqlite3_mutex_held( sqlite3_mutex_alloc(RECOVER_MUTEX_ID) ) );
+  if( recover_g.pMethods ){
+    sqlite3_file *pFd = 0;
+    sqlite3_file_control(p->dbIn, p->zDb,SQLITE_FCNTL_FILE_POINTER,(void*)&pFd);
+    assert( pFd );
     pFd->pMethods = recover_g.pMethods;
     recover_g.pMethods = 0;
     recover_g.p = 0;
@@ -15579,7 +15449,7 @@ static void recoverStep(sqlite3_recover *p){
       recoverSqlCallback(p, "BEGIN");
       recoverSqlCallback(p, "PRAGMA writable_schema = on");
 
-      recoverEnterMutex();
+      sqlite3_mutex_enter( sqlite3_mutex_alloc(RECOVER_MUTEX_ID) );
       recoverInstallWrapper(p);
 
       /* Open the output database. And register required virtual tables and 
@@ -15596,7 +15466,7 @@ static void recoverStep(sqlite3_recover *p){
       recoverCacheSchema(p);
 
       recoverUninstallWrapper(p);
-      recoverLeaveMutex();
+      sqlite3_mutex_leave( sqlite3_mutex_alloc(RECOVER_MUTEX_ID) );
 
       recoverExec(p, p->dbOut, "BEGIN");
 
@@ -15712,7 +15582,7 @@ sqlite3_recover *recoverInit(
     pRet->zDb = (char*)&pRet[1];
     pRet->zUri = &pRet->zDb[nDb+1];
     memcpy(pRet->zDb, zDb, nDb);
-    if( nUri>0 && zUri ) memcpy(pRet->zUri, zUri, nUri);
+    if( nUri>0 ) memcpy(pRet->zUri, zUri, nUri);
     pRet->xSql = xSql;
     pRet->pSqlCtx = pSqlCtx;
     pRet->bRecoverRowid = RECOVER_ROWID_DEFAULT;
@@ -15772,11 +15642,6 @@ int sqlite3_recover_config(sqlite3_recover *p, int op, void *pArg){
   }else{
     switch( op ){
     case SQLITE_RECOVER_TESTDB:
-        /* This undocumented magic configuration option is used to set the
-        ** name of the auxiliary database that is ATTACH-ed to the database
-        ** connection and used to hold state information during the
-        ** recovery process.  This option is for debugging use only and
-        ** is subject to change or removal at any time. */
         sqlite3_free(p->zStateDb);
         p->zStateDb = recoverMPrintf(p, "%s", (char*)pArg);
         break;
@@ -15867,7 +15732,6 @@ int sqlite3_recover_finish(sqlite3_recover *p){
   return rc;
 }
 
-#endif /* ifndef SQLITE_OMIT_VIRTUALTABLE */
 /*************** End <projectDir>/ext/recover/sqlite3recover.c ***************/
 #endif
 
@@ -17541,7 +17405,6 @@ static char *shell_error_context(const char *zSql, sqlite3 *db){
       while( (zSql[len]&0xc0)==0x80 ) len--;
     }
     zCode = sqlite3_mprintf("%.*s", len, zSql);
-    shell_check_oom(zCode);
     for(i=0; zCode[i]; i++){ if( IsSpace(zSql[i]) ) zCode[i] = ' '; }
     if( iOffset<25 ){
       zMsg = sqlite3_mprintf("\n  %z\n  %*s^--- error here", zCode, iOffset, "");
@@ -19733,7 +19596,7 @@ static void open_db(ShellState *p, int openFlags){
     sqlite3_fileio_init(p->db, 0, 0);
     sqlite3_completion_init(p->db, 0, 0);
 #endif
-#if SQLITE_SHELL_HAVE_RECOVER
+#if !defined(SQLITE_OMIT_VIRTUALTABLE) && defined(SQLITE_ENABLE_DBPAGE_VTAB)
     sqlite3_dbdata_init(p->db, 0, 0);
 #endif
 #ifdef SQLITE_HAVE_ZLIB
@@ -20521,7 +20384,7 @@ static int db_int(sqlite3 *db, const char *zSql){
   return res;
 }
 
-#if SQLITE_SHELL_HAVE_RECOVER
+#if !defined(SQLITE_OMIT_VIRTUALTABLE) && defined(SQLITE_ENABLE_DBPAGE_VTAB)
 /*
 ** Convert a 2-byte or 4-byte big-endian integer into a native integer
 */
@@ -20628,7 +20491,8 @@ static int shell_dbinfo_command(ShellState *p, int nArg, char **azArg){
   utf8_printf(p->out, "%-20s %u\n", "data version", iDataVersion);
   return 0;
 }
-#endif /* SQLITE_SHELL_HAVE_RECOVER */
+#endif /* !defined(SQLITE_OMIT_VIRTUALTABLE)
+          && defined(SQLITE_ENABLE_DBPAGE_VTAB) */
 
 /*
 ** Print the current sqlite3_errmsg() value to stderr and return 1.
@@ -21970,7 +21834,7 @@ static char *shellMPrintf(int *pRc, const char *zFmt, ...){
 }
 
 
-#if SQLITE_SHELL_HAVE_RECOVER
+#if !defined(SQLITE_OMIT_VIRTUALTABLE) && defined(SQLITE_ENABLE_DBPAGE_VTAB)
 
 /*
 ** This function is used as a callback by the recover extension. Simply
@@ -21989,9 +21853,9 @@ static int recoverSqlCb(void *pCtx, const char *zSql){
 */
 static int recoverDatabaseCmd(ShellState *pState, int nArg, char **azArg){
   int rc = SQLITE_OK;
-  const char *zRecoveryDb = "";   /* Name of "recovery" database.  Debug only */
+  const char *zRecoveryDb = "";   /* Name of "recovery" database */
   const char *zLAF = "lost_and_found";
-  int bFreelist = 1;              /* 0 if --ignore-freelist is specified */
+  int bFreelist = 1;              /* 0 if --freelist-corrupt is specified */
   int bRowids = 1;                /* 0 if --no-rowids */
   sqlite3_recover *p = 0;
   int i = 0;
@@ -22001,15 +21865,10 @@ static int recoverDatabaseCmd(ShellState *pState, int nArg, char **azArg){
     int n;
     if( z[0]=='-' && z[1]=='-' ) z++;
     n = strlen30(z);
-    if( n<=17 && memcmp("-ignore-freelist", z, n)==0 ){
+    if( n<=17 && memcmp("-freelist-corrupt", z, n)==0 ){
       bFreelist = 0;
     }else
     if( n<=12 && memcmp("-recovery-db", z, n)==0 && i<(nArg-1) ){
-      /* This option determines the name of the ATTACH-ed database used
-      ** internally by the recovery extension.  The default is "" which
-      ** means to use a temporary database that is automatically deleted
-      ** when closed.  This option is undocumented and might disappear at
-      ** any moment. */
       i++;
       zRecoveryDb = azArg[i];
     }else
@@ -22031,7 +21890,7 @@ static int recoverDatabaseCmd(ShellState *pState, int nArg, char **azArg){
       pState->db, "main", recoverSqlCb, (void*)pState
   );
 
-  sqlite3_recover_config(p, SQLITE_RECOVER_TESTDB, (void*)zRecoveryDb);  /* Debug use only */
+  sqlite3_recover_config(p, SQLITE_RECOVER_TESTDB, (void*)zRecoveryDb);
   sqlite3_recover_config(p, SQLITE_RECOVER_LOST_AND_FOUND, (void*)zLAF);
   sqlite3_recover_config(p, SQLITE_RECOVER_ROWIDS, (void*)&bRowids);
   sqlite3_recover_config(p, SQLITE_RECOVER_FREELIST_CORRUPT,(void*)&bFreelist);
@@ -22045,7 +21904,7 @@ static int recoverDatabaseCmd(ShellState *pState, int nArg, char **azArg){
   rc = sqlite3_recover_finish(p);
   return rc;
 }
-#endif /* SQLITE_SHELL_HAVE_RECOVER */
+#endif /* !(SQLITE_OMIT_VIRTUALTABLE) && defined(SQLITE_ENABLE_DBPAGE_VTAB) */
 
 
 /*
@@ -22608,7 +22467,7 @@ static int dbconfigCommand(char *azArg[], int nArg, ShellState *p, char **pzErr)
   }   
   return 0;
 }
-#if SQLITE_SHELL_HAVE_RECOVER
+#if (!defined(SQLITE_OMIT_VIRTUALTABLE) && defined(SQLITE_ENABLE_DBPAGE_VTAB))
 static int dbinfoCommand(char *azArg[], int nArg, ShellState *p, char **pzErr){
   return shell_dbinfo_command(p, nArg, azArg);
 }
@@ -24158,7 +24017,7 @@ static int readCommand(char *azArg[], int nArg, ShellState *p, char **pzErr){
 ** to construct a new database containing all recovered data is output
 ** on stream pState->out.
 */
-#if SQLITE_SHELL_HAVE_RECOVER
+#if (!defined(SQLITE_OMIT_VIRTUALTABLE) && defined(SQLITE_ENABLE_DBPAGE_VTAB))
 static int recoverCommand(char *azArg[], int nArg, ShellState *p, char **pzErr){
   open_db(p, 0);
   int rc = SQLITE_OK;
@@ -24171,14 +24030,14 @@ static int recoverCommand(char *azArg[], int nArg, ShellState *p, char **pzErr){
   int nOrphan = -1;
   RecoverTable *pOrphan = 0;
 
-  int bFreelist = 1;              /* 0 if --ignore-freelist is specified */
+  int bFreelist = 1;              /* 0 if --freelist-corrupt is specified */
   int bRowids = 1;                /* 0 if --no-rowids */
   for(i=1; i<nArg; i++){
     char *z = azArg[i];
     int n;
     if( z[0]=='-' && z[1]=='-' ) z++;
     n = strlen30(z);
-    if( n<=17 && memcmp("-ignore-freelist", z, n)==0 ){
+    if( n<=17 && memcmp("-freelist-corrupt", z, n)==0 ){
       bFreelist = 0;
     }else
     if( n<=12 && memcmp("-recovery-db", z, n)==0 && i<(nArg-1) ){
@@ -24235,7 +24094,7 @@ static int recoverCommand(char *azArg[], int nArg, ShellState *p, char **pzErr){
 
   /* If this is an auto-vacuum database, add all pointer-map pages to
   ** the freelist table. Do this regardless of whether or not 
-  ** --ignore-freelist was specified.  */
+  ** --freelist-corrupt was specified.  */
   shellExec(p->db, &rc, 
     "WITH ptrmap(pgno) AS ("
     "  SELECT 2 WHERE shell_int32("
@@ -25908,7 +25767,7 @@ static struct CommandInfo {
   { "connection", connectionCommand, 0, 1, 4 },
   { "databases", databasesCommand, 2, 1, 0 },
   { "dbconfig", dbconfigCommand, 3, 1, 3 },
-#if SQLITE_SHELL_HAVE_RECOVER
+#if (!defined(SQLITE_OMIT_VIRTUALTABLE) && defined(SQLITE_ENABLE_DBPAGE_VTAB))
   { "dbinfo", dbinfoCommand, 3, 1, 2 },
 #endif
   { "dump", dumpCommand, 0, 1, 2 },
@@ -25954,7 +25813,7 @@ static struct CommandInfo {
 #endif
   { "prompt", promptCommand, 0, 1, 3 },
   { "read", readCommand, 3, 2, 2 },
-#if SQLITE_SHELL_HAVE_RECOVER
+#if (!defined(SQLITE_OMIT_VIRTUALTABLE) && defined(SQLITE_ENABLE_DBPAGE_VTAB))
   { "recover", recoverCommand, 0, 1, 7 },
 #endif
   { "restore", restoreCommand, 0, 2, 3 },
@@ -26077,7 +25936,7 @@ static const char *__azHelp[] = {
   "",
   ".dbconfig ?op? ?val?     List or change sqlite3_db_config() options\n",
   "",
-#if SQLITE_SHELL_HAVE_RECOVER
+#if (!defined(SQLITE_OMIT_VIRTUALTABLE) && defined(SQLITE_ENABLE_DBPAGE_VTAB))
   ".dbinfo ?DB?             Show status information about the database\n",
   "",
 #endif
@@ -26249,9 +26108,9 @@ static const char *__azHelp[] = {
   ".read FILE               Read input from FILE or command output\n",
   "    If FILE begins with \"|\", it is a command that generates the input.\n"
   "",
-#if SQLITE_SHELL_HAVE_RECOVER
+#if (!defined(SQLITE_OMIT_VIRTUALTABLE) && defined(SQLITE_ENABLE_DBPAGE_VTAB))
   ".recover                 Recover as much data as possible from corrupt db.\n",
-  "   --ignore-freelist        Ignore pages that appear to be on db freelist\n"
+  "   --freelist-corrupt       Assume the freelist is corrupt\n"
   "   --recovery-db NAME       Store recovery metadata in database file NAME\n"
   "   --lost-and-found TABLE   Alternative name for the lost-and-found table\n"
   "   --no-rowids              Do not attempt to recover rowid values\n"
@@ -26700,11 +26559,13 @@ static int line_is_command_terminator(char *zLine){
 }
 
 /*
-** The CLI needs a working sqlite3_complete() to work properly.  So error
-** out of the build if compiling with SQLITE_OMIT_COMPLETE.
+** We need a default sqlite3_complete() implementation to use in case
+** the shell is compiled with SQLITE_OMIT_COMPLETE.  The default assumes
+** any arbitrary text is a complete SQL statement.  This is not very
+** user-friendly, but it does seem to work.
 */
 #ifdef SQLITE_OMIT_COMPLETE
-# error the CLI application is imcompatable with SQLITE_OMIT_COMPLETE.
+#define sqlite3_complete(x) 1
 #endif
 
 /*
