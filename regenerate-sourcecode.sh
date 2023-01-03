@@ -14,8 +14,9 @@ rm -f sqliteInt_expanded.h
 make amalgamation
 
 tclsh tool/mksqliteInt_h.tcl --linemacros=0
-sed -i -E -e 's/(SQLITE_PRIVATE[^;]+;)/\/* \1 *\//g' \
-	sqliteInt_expanded.h
+# commenting out the static definitions fixes MSVC error C2133: 'sqlite3OpcodeProperty': unknown size
+# BUT introruces other problems for us in amalgamation1, etc., which we will fix there, locally.
+sed -i -E -e 's/(SQLITE_PRIVATE[^;]+;)/\/* \1 *\//g' 	sqliteInt_expanded.h
 cp sqliteInt_expanded.h            $REPODIR/sqliteInt.h
 
 # also copy the dirent.h from the dirent project:
