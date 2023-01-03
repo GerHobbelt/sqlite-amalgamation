@@ -84,36 +84,6 @@
 * #include's marked with `//--` have been reviewed as already included in the amalgamated sqlite sourcecode.
 */
 
-#if defined(SQLITE_ENABLE_BROKEN_FTS1)
-#include "../sqlite/ext/fts1/fts1.c"
-#include "../sqlite/ext/fts1/fts1_hash.c"
-#include "../sqlite/ext/fts1/fts1_porter.c"
-#include "../sqlite/ext/fts1/fts1_tokenizer1.c"
-#include "../sqlite/ext/fts1/ft_hash.c"
-#include "../sqlite/ext/fts1/fulltext.c"
-#include "../sqlite/ext/fts1/simple_tokenizer.c"
-#endif
-#if defined(SQLITE_ENABLE_BROKEN_FTS2)
-#include "../sqlite/ext/fts2/fts2.c"
-#include "../sqlite/ext/fts2/fts2_hash.c"
-#include "../sqlite/ext/fts2/fts2_icu.c"
-#include "../sqlite/ext/fts2/fts2_porter.c"
-#include "../sqlite/ext/fts2/fts2_tokenizer.c"
-#include "../sqlite/ext/fts2/fts2_tokenizer1.c"
-#endif
-//--#include "../sqlite/ext/fts3/fts3.c"
-//--#include "../sqlite/ext/fts3/fts3_aux.c"
-//--#include "../sqlite/ext/fts3/fts3_expr.c"
-//--#include "../sqlite/ext/fts3/fts3_hash.c"
-#include "../sqlite/ext/fts3/fts3_icu.c"
-//--#include "../sqlite/ext/fts3/fts3_porter.c"
-//--#include "../sqlite/ext/fts3/fts3_snippet.c"
-#include "../sqlite/ext/fts3/fts3_term.c"
-//#include "../sqlite/ext/fts3/fts3_test.c"
-//--#include "../sqlite/ext/fts3/fts3_tokenizer.c"
-//--#include "../sqlite/ext/fts3/fts3_tokenizer1.c"
-//--#include "../sqlite/ext/fts3/fts3_tokenize_vtab.c"
-//--#include "../sqlite/ext/fts3/fts3_unicode.c"
-//--#include "../sqlite/ext/fts3/fts3_unicode2.c"
-//--#include "../sqlite/ext/fts3/fts3_write.c"
-#include "../sqlite/ext/fts3/tool/fts3view.c"
+#include "../sqlite/ext/lsm1/lsm-test/lsmtest3.c"
+#include "../sqlite/ext/lsm1/lsm-test/lsmtest_tdb3.c"
+//#include "../sqlite/ext/lsm1/lsm-test/lsmtest_tdb4.c"

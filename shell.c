@@ -130,13 +130,16 @@ typedef unsigned short int u16;
 #include <string.h>
 #include <stdio.h>
 #include <assert.h>
+
 #include "sqlite3.h"
+
 typedef sqlite3_int64 i64;
 typedef sqlite3_uint64 u64;
 typedef unsigned char u8;
 #if SQLITE_USER_AUTHENTICATION
 # include "sqlite3userauth.h"
 #endif
+
 #include <ctype.h>
 #include <stdarg.h>
 
@@ -1448,6 +1451,8 @@ static void shellAddSchemaName(
 #define SQLITE_EXTENSION_INIT2(X) (void)(X)
 #define SQLITE_EXTENSION_INIT3
 
+# define SQLITE_EXTENSION_EXPORT    
+
 #if defined(_WIN32) && defined(_MSC_VER)
 /****************** Begin <projectDir>/src/test_windirent.h ******************/
 /*
@@ -2653,10 +2658,7 @@ static void sha3QueryFunc(
 }
 
 
-#ifdef _WIN32
-
-#endif
-int sqlite3_shathree_init(
+SQLITE_EXTENSION_EXPORT int sqlite3_shathree_init(
   sqlite3 *db,
   char **pzErrMsg,
   const sqlite3_api_routines *pApi
@@ -2775,10 +2777,7 @@ static int uintCollFunc(
   return (nKey1 - i) - (nKey2 - j);
 }
 
-#ifdef _WIN32
-
-#endif
-int sqlite3_uint_init(
+SQLITE_EXTENSION_EXPORT int sqlite3_uint_init(
   sqlite3 *db, 
   char **pzErrMsg, 
   const sqlite3_api_routines *pApi
@@ -3391,10 +3390,7 @@ mul_end:
   decimal_free(pB);
 }
 
-#ifdef _WIN32
-
-#endif
-int sqlite3_decimal_init(
+SQLITE_EXTENSION_EXPORT int sqlite3_decimal_init(
   sqlite3 *db, 
   char **pzErrMsg, 
   const sqlite3_api_routines *pApi
@@ -3682,10 +3678,7 @@ static void base64(sqlite3_context *context, int na, sqlite3_value *av[]){
 ** Establish linkage to running SQLite library.
 */
 #ifndef SQLITE_SHELL_EXTFUNCS
-#ifdef _WIN32
-
-#endif
-int sqlite3_base_init
+SQLITE_EXTENSION_EXPORT int sqlite3_base_init
 #else
 static int sqlite3_base64_init
 #endif
@@ -4042,10 +4035,7 @@ static void base85(sqlite3_context *context, int na, sqlite3_value *av[]){
 ** Establish linkage to running SQLite library.
 */
 #ifndef SQLITE_SHELL_EXTFUNCS
-#ifdef _WIN32
-
-#endif
-int sqlite3_base_init
+SQLITE_EXTENSION_EXPORT int sqlite3_base_init
 #else
 static int sqlite3_base85_init
 #endif
@@ -4077,7 +4067,7 @@ static int sqlite3_base85_init
 
 #else /* standalone program */
 
-int main(int na, char *av[]){
+int main(int na, const char **av){
   int cin;
   int rc = 0;
   u8 bBuf[4*(B85_DARK_MAX/5)];
@@ -4418,10 +4408,7 @@ static void ieee754func_to_blob(
 }
 
 
-#ifdef _WIN32
-
-#endif
-int sqlite3_ieee_init(
+SQLITE_EXTENSION_EXPORT int sqlite3_ieee_init(
   sqlite3 *db, 
   char **pzErrMsg, 
   const sqlite3_api_routines *pApi
@@ -4902,10 +4889,7 @@ static sqlite3_module seriesModule = {
 
 #endif /* SQLITE_OMIT_VIRTUALTABLE */
 
-#ifdef _WIN32
-
-#endif
-int sqlite3_series_init(
+SQLITE_EXTENSION_EXPORT int sqlite3_series_init(
   sqlite3 *db, 
   char **pzErrMsg, 
   const sqlite3_api_routines *pApi
@@ -5783,10 +5767,7 @@ re_bytecode_func_err:
 ** Invoke this routine to register the regexp() function with the
 ** SQLite database connection.
 */
-#ifdef _WIN32
-
-#endif
-int sqlite3_regexp_init(
+SQLITE_EXTENSION_EXPORT int sqlite3_regexp_init(
   sqlite3 *db, 
   char **pzErrMsg, 
   const sqlite3_api_routines *pApi
@@ -6820,10 +6801,7 @@ static int fsdirRegister(sqlite3 *db){
 # define fsdirRegister(x) SQLITE_OK
 #endif
 
-#ifdef _WIN32
-
-#endif
-int sqlite3_fileio_init(
+SQLITE_EXTENSION_EXPORT int sqlite3_fileio_init(
   sqlite3 *db, 
   char **pzErrMsg, 
   const sqlite3_api_routines *pApi
@@ -7352,10 +7330,7 @@ int sqlite3CompletionVtabInit(sqlite3 *db){
   return rc;
 }
 
-#ifdef _WIN32
-
-#endif
-int sqlite3_completion_init(
+SQLITE_EXTENSION_EXPORT int sqlite3_completion_init(
   sqlite3 *db, 
   char **pzErrMsg, 
   const sqlite3_api_routines *pApi
@@ -8020,14 +7995,11 @@ static const char *apndNextSystemCall(sqlite3_vfs *pVfs, const char *zName){
 }
 
   
-#ifdef _WIN32
-
-#endif
 /* 
 ** This routine is called when the extension is loaded.
 ** Register the new VFS.
 */
-int sqlite3_appendvfs_init(
+SQLITE_EXTENSION_EXPORT int sqlite3_appendvfs_init(
   sqlite3 *db, 
   char **pzErrMsg, 
   const sqlite3_api_routines *pApi
@@ -10276,10 +10248,7 @@ static int zipfileRegister(sqlite3 *db){
 # define zipfileRegister(x) SQLITE_OK
 #endif
 
-#ifdef _WIN32
-
-#endif
-int sqlite3_zipfile_init(
+SQLITE_EXTENSION_EXPORT int sqlite3_zipfile_init(
   sqlite3 *db, 
   char **pzErrMsg, 
   const sqlite3_api_routines *pApi
@@ -10402,10 +10371,7 @@ static void sqlarUncompressFunc(
 }
 
 
-#ifdef _WIN32
-
-#endif
-int sqlite3_sqlar_init(
+SQLITE_EXTENSION_EXPORT int sqlite3_sqlar_init(
   sqlite3 *db, 
   char **pzErrMsg, 
   const sqlite3_api_routines *pApi
@@ -13851,10 +13817,7 @@ static int sqlite3DbdataRegister(sqlite3 *db){
   return rc;
 }
 
-#ifdef _WIN32
-
-#endif
-int sqlite3_dbdata_init(
+SQLITE_EXTENSION_EXPORT int sqlite3_dbdata_init(
   sqlite3 *db, 
   char **pzErrMsg, 
   const sqlite3_api_routines *pApi
@@ -13883,6 +13846,7 @@ int sqlite3_dbdata_init(
 
 
 /* #include "sqlite3recover.h" */
+/* #include "sqlite3ext.h" */
 #include <assert.h>
 #include <string.h>
 
@@ -13893,10 +13857,7 @@ int sqlite3_dbdata_init(
 ** with NULL as the final two arguments to register the sqlite_dbptr and
 ** sqlite_dbdata virtual tables with a database handle.
 */
-#ifdef _WIN32
-
-#endif
-int sqlite3_dbdata_init(sqlite3*, char**, const sqlite3_api_routines*);
+SQLITE_EXTENSION_EXPORT int sqlite3_dbdata_init(sqlite3*, char**, const sqlite3_api_routines*);
 
 /* typedef unsigned int u32; */
 /* typedef unsigned char u8; */

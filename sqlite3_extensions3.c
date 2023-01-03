@@ -84,28 +84,27 @@
 * #include's marked with `//--` have been reviewed as already included in the amalgamated sqlite sourcecode.
 */
 
-#if 0
 #include "../sqlite/ext/lsm1/lsm-test/lsmtest1.c"
 #include "../sqlite/ext/lsm1/lsm-test/lsmtest2.c"
-#include "../sqlite/ext/lsm1/lsm-test/lsmtest3.c"
+//#include "../sqlite/ext/lsm1/lsm-test/lsmtest3.c"
 #include "../sqlite/ext/lsm1/lsm-test/lsmtest4.c"
 #include "../sqlite/ext/lsm1/lsm-test/lsmtest5.c"
 #include "../sqlite/ext/lsm1/lsm-test/lsmtest6.c"
 #include "../sqlite/ext/lsm1/lsm-test/lsmtest7.c"
 #include "../sqlite/ext/lsm1/lsm-test/lsmtest8.c"
 #include "../sqlite/ext/lsm1/lsm-test/lsmtest9.c"
-#include "../sqlite/ext/lsm1/lsm-test/lsmtest_bt.c"
+//#include "../sqlite/ext/lsm1/lsm-test/lsmtest_bt.c"
 #include "../sqlite/ext/lsm1/lsm-test/lsmtest_datasource.c"
 #include "../sqlite/ext/lsm1/lsm-test/lsmtest_func.c"
 #include "../sqlite/ext/lsm1/lsm-test/lsmtest_io.c"
 #include "../sqlite/ext/lsm1/lsm-test/lsmtest_main.c"
 #include "../sqlite/ext/lsm1/lsm-test/lsmtest_mem.c"
 #include "../sqlite/ext/lsm1/lsm-test/lsmtest_tdb.c"
-#include "../sqlite/ext/lsm1/lsm-test/lsmtest_tdb3.c"
-#include "../sqlite/ext/lsm1/lsm-test/lsmtest_tdb4.c"
+//#include "../sqlite/ext/lsm1/lsm-test/lsmtest_tdb3.c"
+//#include "../sqlite/ext/lsm1/lsm-test/lsmtest_tdb4.c"
 #include "../sqlite/ext/lsm1/lsm-test/lsmtest_util.c"
 #include "../sqlite/ext/lsm1/lsm-test/lsmtest_win32.c"
-#endif
+
 #include "../sqlite/ext/lsm1/lsm_ckpt.c"
 #include "../sqlite/ext/lsm1/lsm_file.c"
 #include "../sqlite/ext/lsm1/lsm_log.c"
