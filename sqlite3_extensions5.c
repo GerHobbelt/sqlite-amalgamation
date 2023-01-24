@@ -109,7 +109,6 @@
 #include "../sqlite/ext/misc/explain.c"
 //--#include "../sqlite/ext/misc/fileio.c"
 #include "../sqlite/ext/misc/fossildelta.c"
-#include "../sqlite/ext/misc/fuzzer.c"
 //--#include "../sqlite/ext/misc/ieee754.c"
 #include "../sqlite/ext/misc/memstat.c"
 //--#include "../sqlite/ext/misc/memtrace.c"

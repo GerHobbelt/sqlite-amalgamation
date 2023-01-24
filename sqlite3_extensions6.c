@@ -105,12 +105,6 @@
 
 #undef main
 #undef usage
-#define usage changesetfuzz_usage
-
-#include "../sqlite/ext/session/changesetfuzz.c"
-
-#undef main
-#undef usage
 #define usage changeset_usage
 
 #include "../sqlite/ext/session/changeset.c"
