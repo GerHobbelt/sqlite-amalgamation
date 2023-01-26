@@ -17,7 +17,6 @@ MONOLITHIC_CMD_TABLE_START()
 { "lsmtest", {.fa = sqlite_lsmtest_main } },
 { "rbu", {.fa = sqlite_rbu_main } },
 { "ext_session_changeset", {.fa = sqlite_ext_session_changeset_main } },
-{ "ext_session_fuzzer", {.fa = sqlite_ext_session_fuzzer_main } },
 { "ext_session_speed_test", {.fa = sqlite_ext_session_speed_test_main } },
 { "fast_vacuum", { .fa = sqlite_fast_vacuum_main } },
 { "getlock", { .fa = sqlite_getlock_main } },
