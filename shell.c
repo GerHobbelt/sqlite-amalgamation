@@ -17197,25 +17197,41 @@ static void outputModePop(ShellState *p){
 /*
 ** Output the given string as a hex-encoded blob (eg. X'1234' )
 */
-static void output_hex_blob(FILE *out, const void *pBlob, int nBlob){
+static void output_hex_blob(FILE *out, ShellState* p, const void *pBlob, int nBlob){
   int i;
   unsigned char *aBlob = (unsigned char*)pBlob;
 
-  char *zStr = sqlite3_malloc(nBlob*2 + 1);
-  shell_check_oom(zStr);
-
-  for(i=0; i<nBlob; i++){
-    static const char aHex[] = {
-        '0', '1', '2', '3', '4', '5', '6', '7',
-        '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'
-    };
-    zStr[i*2] = aHex[ (aBlob[i] >> 4) ];
-    zStr[i*2+1] = aHex[ (aBlob[i] & 0x0F) ];
+  int indnt = p->iIndent;    // TODO: flag to drive the logic below
+  int nonprintable_count = 0;
+  int squote_count = 0;
+  for (i = 0; i < nBlob; i++) {
+	  unsigned char c = aBlob[i];
+	  if (c < ' ' || c >= 127)
+		  nonprintable_count++;
+	  else if (c == '\'')
+		  squote_count++;
   }
-  zStr[i*2] = '\0';
 
-  raw_printf(out,"X'%s'", zStr);
-  sqlite3_free(zStr);
+  if (nonprintable_count == 0 && squote_count == 0) {
+	  raw_printf(out, "'%.*s'", nBlob, aBlob);
+  }
+  else {
+	  char* zStr = sqlite3_malloc(nBlob * 2 + 1);
+	  shell_check_oom(zStr);
+
+	  for (i = 0; i < nBlob; i++) {
+		  static const char aHex[] = {
+			  '0', '1', '2', '3', '4', '5', '6', '7',
+			  '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'
+		  };
+		  zStr[i * 2] = aHex[(aBlob[i] >> 4)];
+		  zStr[i * 2 + 1] = aHex[(aBlob[i] & 0x0F)];
+	  }
+	  zStr[i * 2] = '\0';
+
+	  raw_printf(out, "X'%s'", zStr);
+	  sqlite3_free(zStr);
+  }
 }
 
 /*
@@ -18126,7 +18142,7 @@ static int shell_callback(
         }else if( aiType && aiType[i]==SQLITE_BLOB && p->pStmt ){
           const void *pBlob = sqlite3_column_blob(p->pStmt, i);
           int nBlob = sqlite3_column_bytes(p->pStmt, i);
-          output_hex_blob(p->out, pBlob, nBlob);
+          output_hex_blob(p->out, p, pBlob, nBlob);
         }else if( isNumber(azArg[i], 0) ){
           utf8_printf(p->out,"%s", azArg[i]);
         }else if( ShellHasFlag(p, SHFLG_Newlines) ){
@@ -18206,7 +18222,7 @@ static int shell_callback(
         }else if( aiType && aiType[i]==SQLITE_BLOB && p->pStmt ){
           const void *pBlob = sqlite3_column_blob(p->pStmt, i);
           int nBlob = sqlite3_column_bytes(p->pStmt, i);
-          output_hex_blob(p->out, pBlob, nBlob);
+          output_hex_blob(p->out, p, pBlob, nBlob);
         }else if( isNumber(azArg[i], 0) ){
           utf8_printf(p->out,"%s", azArg[i]);
         }else{
@@ -20040,7 +20056,7 @@ static int dump_callback(void *pArg, int nArg, char **azArg, char **azNotUsed){
     savedDestTable = p->zDestTable;
     savedMode = p->mode;
     p->zDestTable = sTable.z;
-    p->mode = p->cMode = MODE_Insert;
+    // p->mode = p->cMode = MODE_Insert;
     rc = shell_exec(p, sSelect.z, 0);
     if( (rc&0xff)==SQLITE_CORRUPT ){
       raw_printf(p->out, "/****** CORRUPTION ERROR *******/\n");
