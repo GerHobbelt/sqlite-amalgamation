@@ -190005,7 +190005,7 @@ SQLITE_PRIVATE void sqlite3Fts3EvalPhraseCleanup(Fts3Phrase *pPhrase){
 ** Return SQLITE_CORRUPT_VTAB.
 */
 #ifdef SQLITE_DEBUG
-SQLITE_PRIVATE int sqlite3Fts3Corrupt(){
+SQLITE_PRIVATE int sqlite3Fts3Corrupt(void){
   return SQLITE_CORRUPT_VTAB;
 }
 #endif
@@ -234775,7 +234775,7 @@ static void sqlite3Fts5HashScanEntry(
 #define FTS5_DLIDX_ROWID(segid, height, pgno) fts5_dri(segid, 1, height, pgno)
 
 #ifdef SQLITE_DEBUG
-static int sqlite3Fts5Corrupt() { return SQLITE_CORRUPT_VTAB; }
+static int sqlite3Fts5Corrupt(void) { return SQLITE_CORRUPT_VTAB; }
 #endif
 
 
