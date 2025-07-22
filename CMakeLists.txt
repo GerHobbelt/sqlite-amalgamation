@@ -10,7 +10,6 @@ include(GNUInstallDirs)
 
 #------------------------------------------------------------------------------
 # externpro
-set(buildpro_REV 24.07)
 include(flags)
 if(NOT DEFINED XP_NAMESPACE)
   set(XP_NAMESPACE SQLite)
