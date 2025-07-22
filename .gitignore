@@ -1,8 +1,10 @@
 # ignore all subdirectories
 **/
 
-# Exclude specific subdirectories/dotfiles to track
+# track .devcontainer, .github directory, and contents
 !.devcontainer
+!.github
+!.github/*
 
 # externpro
 .env

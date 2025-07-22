@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.28)
+cmake_minimum_required(VERSION 3.31)
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/.devcontainer/cmake)
 include(preproject)
 project(SQLite3
@@ -10,7 +10,6 @@ include(GNUInstallDirs)
 
 #------------------------------------------------------------------------------
 # externpro
-set(buildpro_REV 24.07)
 include(flags)
 if(NOT DEFINED XP_NAMESPACE)
   set(XP_NAMESPACE SQLite)
