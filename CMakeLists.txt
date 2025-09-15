@@ -1,8 +1,7 @@
 cmake_minimum_required(VERSION 3.31)
-list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/.devcontainer/cmake)
-include(preproject)
+set(CMAKE_PROJECT_TOP_LEVEL_INCLUDES .devcontainer/cmake/xproinc.cmake)
 project(SQLite3
-    VERSION   3.37.2.3
+    VERSION   3.37.2
     LANGUAGES C
     )
 
@@ -10,20 +9,21 @@ include(GNUInstallDirs)
 
 #------------------------------------------------------------------------------
 # externpro
-include(flags)
+include(xpflags)
+set(targetsFile ${PROJECT_NAME}Config)
 if(NOT DEFINED XP_NAMESPACE)
   set(XP_NAMESPACE SQLite)
   set(debugPostfix DEBUG_POSTFIX d)
   set(XP_INSTALL_CMAKEDIR cmake)
 else()
   set(XP_INSTALL_CMAKEDIR ${CMAKE_INSTALL_DATADIR}/cmake)
+  string(JOIN "\n" EXT1
+    "set(THREAD_PREFER_PTHREAD_FLAG ON)"
+    "find_package(Threads REQUIRED) # depends on Threads::Threads"
+    ""
+    )
+  xpPackageDevel(LIBRARIES ${XP_NAMESPACE}::${PROJECT_NAME} TARGETS_FILE ${targetsFile})
 endif()
-string(JOIN "\n" EXT1
-  "set(THREAD_PREFER_PTHREAD_FLAG ON)"
-  "find_package(Threads REQUIRED) # depends on Threads::Threads"
-  ""
-  )
-xpPackageDevel(LIBRARIES ${XP_NAMESPACE}::${PROJECT_NAME} TARGETS_FILE ${PROJECT_NAME}Config)
 
 #------------------------------------------------------------------------------
 # build options and optional modules:
@@ -109,12 +109,12 @@ endif()
 #------------------------------------------------------------------------------
 configure_file(sqlite3_config.h.in ${CMAKE_BINARY_DIR}/sqlite3_config.h)
 
-install(TARGETS ${PROJECT_NAME} EXPORT ${PROJECT_NAME}Config
+install(TARGETS ${PROJECT_NAME} EXPORT ${targetsFile}
     ARCHIVE       DESTINATION ${CMAKE_INSTALL_LIBDIR}
     LIBRARY       DESTINATION ${CMAKE_INSTALL_LIBDIR}
     PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
     )
-install(EXPORT  ${PROJECT_NAME}Config
+install(EXPORT  ${targetsFile}
     NAMESPACE   ${XP_NAMESPACE}::
     DESTINATION ${XP_INSTALL_CMAKEDIR}
     )
@@ -146,7 +146,7 @@ if(BUILD_SHELL)
             set(${flag} "${${flag}}" CACHE STRING "msvc flags" FORCE)
         endforeach()
     endif()
-    install(TARGETS shell_app EXPORT ${PROJECT_NAME}Config
+    install(TARGETS shell_app EXPORT ${targetsFile}
         RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} CONFIGURATIONS Release
         )
 endif()
