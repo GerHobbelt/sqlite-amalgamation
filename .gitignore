@@ -1,6 +1,16 @@
 # ignore all subdirectories
 **/
 
+# track .devcontainer, .github directory, and contents
+!.devcontainer
+!.github
+!.github/*
+
+# externpro
+.env
+_bld*/
+docker-compose.override.yml
+
 # YouCompleteMe
 .ycm_extra_conf.*
 

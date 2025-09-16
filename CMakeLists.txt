@@ -1,10 +1,29 @@
-cmake_minimum_required(VERSION 3.8)
+cmake_minimum_required(VERSION 3.31)
+set(CMAKE_PROJECT_TOP_LEVEL_INCLUDES .devcontainer/cmake/xproinc.cmake)
 project(SQLite3
-    VERSION   3.31.1
+    VERSION   3.38.2
     LANGUAGES C
     )
 
 include(GNUInstallDirs)
+
+#------------------------------------------------------------------------------
+# externpro
+include(xpflags)
+set(targetsFile ${PROJECT_NAME}Config)
+if(NOT DEFINED XP_NAMESPACE)
+    set(XP_NAMESPACE SQLite)
+    set(debugPostfix DEBUG_POSTFIX d)
+    set(XP_INSTALL_CMAKEDIR cmake)
+else()
+    set(XP_INSTALL_CMAKEDIR ${CMAKE_INSTALL_DATADIR}/cmake)
+    string(JOIN "\n" EXT1
+        "set(THREAD_PREFER_PTHREAD_FLAG ON)"
+        "find_package(Threads REQUIRED) # depends on Threads::Threads"
+        ""
+        )
+    xpPackageDevel(TARGETS_FILE ${targetsFile} LIBRARIES ${XP_NAMESPACE}::${PROJECT_NAME})
+endif()
 
 #------------------------------------------------------------------------------
 # build options and optional modules:
@@ -41,7 +60,7 @@ add_library(${PROJECT_NAME} STATIC sqlite3.c)
 set_target_properties(${PROJECT_NAME} PROPERTIES
     OUTPUT_NAME   sqlite3
     PUBLIC_HEADER sqlite3.h
-    DEBUG_POSTFIX d
+    ${debugPostfix}
     )
 target_include_directories(${PROJECT_NAME} PUBLIC $<INSTALL_INTERFACE:include>)
 target_compile_definitions(${PROJECT_NAME} PUBLIC # inject user's options
@@ -88,18 +107,25 @@ elseif(WIN32 AND ${CMAKE_SIZEOF_VOID_P} LESS 8) # this is a 32bit windows
             )
     endif()
 endif()
+if(SQLITE_ENABLE_MATH_FUNCTIONS)
+    include(CheckLibraryExists)
+    check_library_exists(m sin "m" HAVE_LIBM)
+    if(HAVE_LIBM)
+        target_link_libraries(${PROJECT_NAME} PRIVATE m)
+    endif()
+endif()
 
 #------------------------------------------------------------------------------
 configure_file(sqlite3_config.h.in ${CMAKE_BINARY_DIR}/sqlite3_config.h)
 
-install(TARGETS ${PROJECT_NAME} EXPORT ${PROJECT_NAME}Config
+install(TARGETS ${PROJECT_NAME} EXPORT ${targetsFile}
     ARCHIVE       DESTINATION ${CMAKE_INSTALL_LIBDIR}
     LIBRARY       DESTINATION ${CMAKE_INSTALL_LIBDIR}
     PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
     )
-install(EXPORT  ${PROJECT_NAME}Config
-    NAMESPACE   SQLite::
-    DESTINATION cmake
+install(EXPORT  ${targetsFile}
+    NAMESPACE   ${XP_NAMESPACE}::
+    DESTINATION ${XP_INSTALL_CMAKEDIR}
     )
 install(FILES
     ${CMAKE_BINARY_DIR}/sqlite3_config.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
@@ -115,7 +141,7 @@ if(BUILD_SHELL)
     if(UNIX)
         if(CMAKE_BUILD_TYPE STREQUAL Release)
             add_custom_command(TARGET shell_app POST_BUILD
-                COMMAND ${CMAKE_STRIP} sqlite3
+                COMMAND ${CMAKE_STRIP} $<TARGET_FILE:shell_app>
                 )
         endif()
     elseif(MSVC)
@@ -129,7 +155,7 @@ if(BUILD_SHELL)
             set(${flag} "${${flag}}" CACHE STRING "msvc flags" FORCE)
         endforeach()
     endif()
-    install(TARGETS shell_app
-        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+    install(TARGETS shell_app EXPORT ${targetsFile}
+        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} CONFIGURATIONS Release
         )
 endif()
