@@ -9,7 +9,6 @@ include(GNUInstallDirs)
 
 #------------------------------------------------------------------------------
 # externpro
-include(xpflags)
 set(targetsFile ${PROJECT_NAME}Config)
 if(NOT DEFINED XP_NAMESPACE)
     set(XP_NAMESPACE SQLite)
