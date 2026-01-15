@@ -10,5 +10,11 @@
         "BUILD_SHELL": "ON"
       }
     }
+  ],
+  "buildPresets": [
+    {
+      "name": "build-base",
+      "hidden": true
+    }
   ]
 }
