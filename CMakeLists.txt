@@ -10,18 +10,20 @@ include(GNUInstallDirs)
 #------------------------------------------------------------------------------
 # externpro
 set(targetsFile ${PROJECT_NAME}Config)
-if(NOT DEFINED XP_NAMESPACE)
-    set(XP_NAMESPACE SQLite)
-    set(debugPostfix DEBUG_POSTFIX d)
-    set(XP_INSTALL_CMAKEDIR cmake)
+if(DEFINED XP_NAMESPACE)
+    xpExternPackage(NAMESPACE ${XP_NAMESPACE} ALIAS_NAMESPACE SQLite
+      TARGETS_FILE ${targetsFile} LIBRARIES ${PROJECT_NAME}
+      BASE ${CMAKE_PROJECT_VERSION} XPDIFF "patch" FIND_THREADS
+      WEB "https://www.sqlite.org/index.html 'SQLite website'" UPSTREAM "github.com/azadkuh/sqlite-amalgamation"
+      DESC "C-language library that implements a small, fast, self-contained, high-reliability, full-featured, SQL database engine"
+      LICENSE "[public domain](https://www.sqlite.org/copyright.html 'open-source, not open-contribution')"
+      )
+    set(CMAKE_NAMESPACE ${XP_NAMESPACE})
+    set(CMAKE_INSTALL_CMAKEDIR ${XP_INSTALL_CMAKEDIR})
 else()
-    set(XP_INSTALL_CMAKEDIR ${CMAKE_INSTALL_DATADIR}/cmake)
-    string(JOIN "\n" EXT1
-        "set(THREAD_PREFER_PTHREAD_FLAG ON)"
-        "find_package(Threads REQUIRED) # depends on Threads::Threads"
-        ""
-        )
-    xpPackageDevel(TARGETS_FILE ${targetsFile} LIBRARIES ${XP_NAMESPACE}::${PROJECT_NAME})
+    set(debugPostfix DEBUG_POSTFIX d)
+    set(CMAKE_NAMESPACE SQLite)
+    set(CMAKE_INSTALL_CMAKEDIR cmake)
 endif()
 
 #------------------------------------------------------------------------------
@@ -123,8 +125,8 @@ install(TARGETS ${PROJECT_NAME} EXPORT ${targetsFile}
     PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
     )
 install(EXPORT  ${targetsFile}
-    NAMESPACE   ${XP_NAMESPACE}::
-    DESTINATION ${XP_INSTALL_CMAKEDIR}
+    NAMESPACE   ${CMAKE_NAMESPACE}::
+    DESTINATION ${CMAKE_INSTALL_CMAKEDIR}
     )
 install(FILES
     ${CMAKE_BINARY_DIR}/sqlite3_config.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
