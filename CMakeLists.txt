@@ -19,7 +19,6 @@ if(DEFINED XP_NAMESPACE)
       LICENSE "[public domain](https://www.sqlite.org/copyright.html 'open-source, not open-contribution')"
       )
     set(CMAKE_NAMESPACE ${XP_NAMESPACE})
-    set(CMAKE_INSTALL_CMAKEDIR ${XP_INSTALL_CMAKEDIR})
 else()
     set(debugPostfix DEBUG_POSTFIX d)
     set(CMAKE_NAMESPACE SQLite)
